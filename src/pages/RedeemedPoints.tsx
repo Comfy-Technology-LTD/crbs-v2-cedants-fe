@@ -5,7 +5,7 @@ const RedeemedPoints = () => {
   const navigate = useNavigate()
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto">
       <button onClick={() => navigate("/dashboard", { replace: true})} className="text-blue-500 flex items-center mb-4">
         <FaArrowLeft className="mr-2" /> Back to Dashboard
       </button>
