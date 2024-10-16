@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 
-const DropdownButton: React.FC = () => {
+const DropDownButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
@@ -42,4 +42,4 @@ const DropdownButton: React.FC = () => {
   );
 };
 
-export default DropdownButton;
+export default DropDownButton;

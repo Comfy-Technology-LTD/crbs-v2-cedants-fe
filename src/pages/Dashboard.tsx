@@ -1,4 +1,4 @@
-import { FaCoins, FaMoneyBillWave, FaPlus, FaUpload } from "react-icons/fa";
+import { FaCoins, FaMoneyBillWave, FaPlus } from "react-icons/fa";
 import {
   FaHandshake,
   FaFolderOpen,
@@ -11,9 +11,9 @@ import BusinessStats from "../components/commons/BusinessStats";
 import CountUp from "react-countup";
 import { useState } from "react";
 import BusinessModal from "../components/commons/BusinessModal";
-import DropdownButton from "../components/commons/DropDownButton";
 import RedeemPointsModal from "../components/commons/RedeemPointsModal";
 import moment from "moment";
+import DropDownButton from "../components/commons/DropDownButton";
 
 const statsData = [
   { title: "Total Offers", value: 5, icon: <FaHandshake /> },
@@ -222,7 +222,7 @@ const Dashboard: React.FC = () => {
                   </td>
                   <td className="py-3 px-6 text-left">{item.businessDate}</td>
                   <td className="py-3 px-6 flex text-left space-x-2">
-                    <DropdownButton />
+                    <DropDownButton />
                     <button
                       onClick={toggleModal}
                       className="flex items-center px-3 py-1 bg-orange-500 text-white rounded-md text-xs hover:bg-orange-600 transition"
