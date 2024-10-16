@@ -10,7 +10,7 @@ const DashboardRoot: React.FC = () => {
     if (!saveTestUser) {
       navigate("/", { replace: true })
     }
-  }, [setSaveTestUser])
+  }, [saveTestUser, navigate, setSaveTestUser])
 
   return (
     <>

@@ -232,7 +232,7 @@ const Dashboard: React.FC = () => {
                   </td>
                 </tr>
               ))}
-              
+
             </tbody>
           </table>
         </div>
