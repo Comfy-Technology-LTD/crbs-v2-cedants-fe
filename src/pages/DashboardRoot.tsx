@@ -1,7 +1,17 @@
-import { Outlet } from "react-router-dom"
+import { Outlet, useNavigate } from "react-router-dom"
 import Header from "../components/layouts/Header"
+import { useEffect, useState } from "react"
 
 const DashboardRoot: React.FC = () => {
+  const [saveTestUser, setSaveTestUser] = useState(localStorage.getItem("test-token") || null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!saveTestUser) {
+      navigate("/", { replace: true })
+    }
+  }, [setSaveTestUser])
+
   return (
     <>
       <Header />

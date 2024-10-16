@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { FaArrowLeft } from 'react-icons/fa';
 import { LOGO } from '../../constants'; // Import your logo here
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate()
+  const [saveTestUser ] = useState(localStorage.getItem("test-token") || null)
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -25,31 +25,46 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center">
-          <span className="border px-3 text-xs text-white mr-2 shadow-md hover:bg-green-900 rounded-full bg-green-800 cursor-pointer">
-            Active
-          </span>
-          <div className="relative">
-            <div className="flex items-center cursor-pointer" onClick={toggleMenu}>
-              <div className="flex flex-col items-end mr-2">
-                <h1 className="text-sm -mb-1 font-semibold hover:text-blue-600">
-                  Cole Baidoo
-                </h1>
-                <h3 className="text-xs font-extralight">Insurance Company A</h3>
-              </div>
-              <div className="border-2 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-full w-14 h-14 flex justify-center items-center">
-                <h3 className="text-2xl font-bold hover:text-white">CB</h3>
+
+        {
+          saveTestUser && (
+            <div className="flex items-center">
+              <span className="border px-3 text-xs text-white mr-2 shadow-md hover:bg-green-900 rounded-full bg-green-800 cursor-pointer">
+                Active
+              </span>
+              <div className="relative">
+                <div className="flex items-center cursor-pointer" onClick={toggleMenu}>
+                  <div className="flex flex-col items-end mr-2">
+                    <h1 className="text-sm -mb-1 font-semibold hover:text-blue-600">
+                      Cole Baidoo
+                    </h1>
+                    <h3 className="text-xs font-extralight">Insurance Company A</h3>
+                  </div>
+                  <div className="border-2 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-full w-14 h-14 flex justify-center items-center">
+                    <h3 className="text-2xl font-bold hover:text-white">CB</h3>
+                  </div>
+                </div>
+                {menuOpen && (
+                  <div className="absolute z-50 right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg">
+                    <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {
+                      navigate("/dashboard/redeemed-points")
+                      toggleMenu()
+                    }}>Redeemed Points</button>
+                    <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {
+                      navigate("/dashboard/profile")
+                      toggleMenu()
+                    }}>Profile</button>
+                    <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { 
+                      localStorage.removeItem("test-token")
+                      navigate("/")
+                     }}>Logout</button>
+                  </div>
+                )}
               </div>
             </div>
-            {menuOpen && (
-              <div className="absolute z-50 right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg">
-                <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {navigate("/dashboard/redeemed-points") }}>Redeemed Points</button>
-                <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {navigate("/dashboard/profile") }}>Profile</button>
-                <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {/* Handle Logout */ }}>Logout</button>
-              </div>
-            )}
-          </div>
-        </div>
+          )
+        }
+
       </div>
     </div>
   );

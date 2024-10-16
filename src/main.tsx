@@ -10,6 +10,8 @@ import Dashboard from './pages/Dashboard.tsx'
 import DashboardRoot from './pages/DashboardRoot.tsx'
 import RedeemedPoints from './pages/RedeemedPoints.tsx'
 import Profile from './pages/Profile.tsx'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const router = createBrowserRouter([
   {
@@ -18,7 +20,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "login",
+        path: "",
         element: <Login />
       },
       {
@@ -51,5 +53,6 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RouterProvider router={router} />
+    <ToastContainer />
   </StrictMode>,
 )
