@@ -15,6 +15,7 @@ import RedeemPointsModal from "../components/commons/RedeemPointsModal";
 import moment from "moment";
 import DropDownButton from "../components/commons/DropDownButton";
 
+
 const statsData = [
   { title: "Total Offers", value: 5, icon: <FaHandshake /> },
   { title: "Total Open Offers", value: 25, icon: <FaFolderOpen /> },

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate()
-  const [saveTestUser ] = useState(localStorage.getItem("test-token") || null)
+  const [saveTestUser] = useState(localStorage.getItem("test-token") || null)
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -29,9 +29,6 @@ const Header = () => {
         {
           saveTestUser && (
             <div className="flex items-center">
-              <span className="border px-3 text-xs text-white mr-2 shadow-md hover:bg-green-900 rounded-full bg-green-800 cursor-pointer">
-                Active
-              </span>
               <div className="relative">
                 <div className="flex items-center cursor-pointer" onClick={toggleMenu}>
                   <div className="flex flex-col items-end mr-2">
@@ -39,6 +36,9 @@ const Header = () => {
                       Cole Baidoo
                     </h1>
                     <h3 className="text-xs font-extralight">Insurance Company A</h3>
+                    <span className="border px-3 text-xs text-white mr-2 shadow-md hover:bg-green-900 rounded-full bg-green-800 cursor-pointer">
+                      Active
+                    </span>
                   </div>
                   <div className="border-2 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-full w-14 h-14 flex justify-center items-center">
                     <h3 className="text-2xl font-bold hover:text-white">CB</h3>
@@ -54,10 +54,10 @@ const Header = () => {
                       navigate("/dashboard/profile")
                       toggleMenu()
                     }}>Profile</button>
-                    <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => { 
+                    <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {
                       localStorage.removeItem("test-token")
                       navigate("/")
-                     }}>Logout</button>
+                    }}>Logout</button>
                   </div>
                 )}
               </div>
