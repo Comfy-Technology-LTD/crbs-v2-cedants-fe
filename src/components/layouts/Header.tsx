@@ -27,7 +27,7 @@ const Header = () => {
         </div>
 
         {
-          saveTestUser && (
+         
             <div className="flex items-center">
               <span className="border px-3 text-xs text-white mr-2 shadow-md hover:bg-green-900 rounded-full bg-green-800 cursor-pointer">
                 Active
@@ -62,7 +62,6 @@ const Header = () => {
                 )}
               </div>
             </div>
-          )
         }
 
       </div>
