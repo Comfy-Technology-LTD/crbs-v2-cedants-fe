@@ -5,7 +5,7 @@ export interface BusinessStatsProps {
 }
 
 export interface BusinessModalProp {
-  close: () => void
+  close: () => void;
 }
 
 export interface RegisterProps {
@@ -35,7 +35,7 @@ export interface User {
   assoc_first_name: string;
   assoc_last_name: string;
   assoc_email: string;
-  position : string;
+  position: string;
   name: string;
 }
 
@@ -45,5 +45,37 @@ export interface CedantProps {
 }
 
 export interface LoadingProps {
-  title: string
+  title: string;
+}
+
+export interface OfferProps {
+  class_of_businessesclass_of_business_id: string;
+  policy_number: string;
+  insured_by: string;
+  period_of_insurance_from: string;
+  period_of_insurance_to: string;
+  currency: string;
+  offer_comment: string;
+  offer_details: string;
+  rate: number;
+  commission: number;
+  facultative_offer: number;
+  sum_insured: number;
+  premium: number;
+}
+
+export interface CurrencyProps {
+  symbol:         string;
+  name:           string;
+  symbol_native:  string;
+  decimal_digits: number;
+  rounding:       number;
+  code:           string;
+  name_plural:    string;
+}
+
+export interface BusinessProps {
+  id: number,
+  business_name: string
+  business_details: string 
 }

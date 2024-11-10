@@ -2,7 +2,7 @@ import { LOGO } from "../constants";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CedantProps, RegisterProps } from "../interfaces";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import apiInstance from "../util";
+import apiInstance, { errorHandler } from "../util";
 import { Bounce, toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
@@ -55,13 +55,7 @@ const Register: React.FC = () => {
       console.log(error)
       if (error?.status == 422) {
         const errorBag = error?.response?.data?.errors;
-        Object.entries(errorBag).map(([key, value]) => {
-          value.map((error: string) => {
-            toast.warn(`${key} ${error}`, {
-              theme: 'colored'
-            })
-          })
-        })
+        errorHandler(errorBag);
       }
     }
   })
