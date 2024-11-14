@@ -1,4 +1,4 @@
-import { BusinessDetailProps, BusinessModalProp, BusinessProps, CurrencyProps, OfferProps } from "../../interfaces";
+import { BusinessDetailProps, BusinessModalProp, BusinessProps, CurrencyProps, OfferProps, SingleOfferResponse } from "../../interfaces";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CURRENCY } from "../../constants/currency";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -7,12 +7,13 @@ import { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import Loading from "./Loading";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<OfferProps>()
-  const [businessDetails, setBusinessDetails] = useState<BusinessDetailProps[]>()
-  const [businessDetailsPopulate, setBusinessDetailsPopulate] = useState<{ keydetail: string; value: string }[]>([]);
+  const { register, handleSubmit, formState: { errors } } = useForm<OfferProps>()
+  const [businessDetailsPopulate, setBusinessDetailsPopulate] = useState<{ keydetail?: string; value?: string }>({});
+  const [searchParams] = useSearchParams()
 
   const { data, isLoading } = useQuery({
     queryKey: ['businesses'],
@@ -25,16 +26,24 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
     }
   });
 
-  const { data: singleOffer, isLoading: isSingleLoading } = useQuery({
+  const { data: singleOffer, isLoading: isSingleLoading, isFetched, isFetching } = useQuery<SingleOfferResponse>({
     queryKey: ['singleOffer'],
     queryFn: () => {
-      return apiInstance.get('api/v1/offer', {
+      const param = searchParams.get('_content');
+      return apiInstance.get(`api/v1/offer/${param}`, {
         headers: {
           'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
         }
       })
-    }
+    },
+    refetchOnWindowFocus: false
   });
+
+  useEffect(() => {
+    const details = singleOffer?.data?.data?.offer_detail.offer_details
+    setBusinessDetailsPopulate(JSON.parse(details || "[]"))
+  }, [isFetched, singleOffer?.data?.data?.offer_detail.offer_details])
+
 
 
   const handleInputChange = (keydetail: string, value: string) => {
@@ -50,10 +59,11 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
     });
   };
 
-  const businessMutation = useMutation({
-    mutationKey: ['businesMutate'],
+  const businessUpdateMutation = useMutation({
+    mutationKey: ['businessUpdateMutate'],
     mutationFn: (data: OfferProps) => {
-      return apiInstance.post("/api/v1/offer", data, {
+      const param = searchParams.get('_content');
+      return apiInstance.put(`/api/v1/offer/${param}`, data, {
         headers: {
           'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
         }
@@ -64,21 +74,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
         theme: 'colored',
         position: 'top-center'
       });
-      setBusinessDetails([])
-      reset({
-        class_of_businessesclass_of_business_id: "",
-        policy_number: "",
-        insured_by: "",
-        sum_insured: "",
-        premium: "",
-        rate: "",
-        facultative_offer: "",
-        commission: "",
-        currency: "",
-        period_of_insurance_from: "",
-        period_of_insurance_to: "",
-        offer_comment: ""
-      })
+      setBusinessDetailsPopulate({})
       close()
     },
     onError: (error: AxiosError) => {
@@ -90,26 +86,18 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
     }
   });
 
-  const createCedantOffer: SubmitHandler<OfferProps> = (data) => {
-    data.class_of_businessesclass_of_business_id = JSON.parse(data.class_of_businessesclass_of_business_id).id
+  const updateCedantOffer: SubmitHandler<OfferProps> = (data) => {
+    data.class_of_businessesclass_of_business_id = singleOffer?.data?.data?.class_of_businessesclass_of_business_id.toString() || ""
     data.offer_details = JSON.stringify(businessDetailsPopulate)
     console.log(data)
-    businessMutation.mutateAsync(data)
+    businessUpdateMutation.mutateAsync(data)
   }
-
-  useEffect(() => {
-    console.log(singleOffer)
-  }, [])
-
-  useEffect(() => {
-    setBusinessDetailsPopulate([])
-  }, [businessDetails])
 
   if (isLoading) {
     return <Loading title="Preparing business list..." />
   }
 
-  if (isSingleLoading) {
+  if (isSingleLoading || isFetching) {
     return <Loading title="Preparing Offer content..." />
   }
 
@@ -149,21 +137,22 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
               <label className="block text-gray-600">Class of Business</label>
               <select
                 {
-                ...register('class_of_businessesclass_of_business_id', {
-                  required: "Select class of business"
-                })
+                ...register('class_of_businessesclass_of_business_id')
                 }
+                disabled={true}
+                defaultValue={singleOffer?.data?.data?.class_of_business.id}
+                value={singleOffer?.data?.data?.class_of_business.id}
                 onChange={(e) => {
                   console.log(e.target.value)
-                  setBusinessDetails(JSON.parse((JSON.parse(e.target.value) as BusinessProps).business_details) || [])
+                  // setBusinessDetails(JSON.parse((JSON.parse(e.target.value) as BusinessProps).business_details) || [])
                 }}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full disabled:bg-slate-100 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option defaultValue=" ">
                   Select class of business
                 </option>
                 {
                   (data?.data?.data as BusinessProps[]).map((business: BusinessProps, key: number) => (
-                    <option key={key} value={JSON.stringify(business)} defaultValue={JSON.stringify(business)}>{business.business_name}</option>
+                    <option key={key} value={business.id} defaultValue={business.id}>{business.business_name}</option>
 
                   ))
                 }
@@ -177,25 +166,26 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
 
           <div className="grid">
             {
-              businessDetails?.length ? (
-                <fieldset className="border p-2 rounded-lg">
-                  <legend className="text-md">Business Details</legend>
-                  <div className="grid grid-cols-2 gap-4">
-                    {
-                      businessDetails?.map((business: BusinessDetailProps, key: number) => (
-                        <div key={key}>
-                          <label className="block text-gray-600 mb-1">{business.keydetail}</label>
-                          <input
-                            onChange={(e) => handleInputChange(business.keydetail, e.target.value)}
-                            type="text"
-                            placeholder={`e.g. ${business.keydetail}`}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                      ))
-                    }
-                  </div>
-                </fieldset>) : ""
+              <fieldset className="border p-2 rounded-lg">
+                <legend className="text-md">Business Details</legend>
+                <div className="grid grid-cols-2 gap-4">
+                  {
+                    Object.entries((businessDetailsPopulate as BusinessDetailProps))?.map(([index, value]) => (
+                      <div key={index}>
+                        <label className="block text-gray-600 mb-1">{value?.keydetail}</label>
+                        <input
+                          onChange={(e) => handleInputChange(value.keydetail, e.target.value)}
+                          type="text"
+                          value={value.value}
+                          placeholder={`e.g. ${value.keydetail}`}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                    ))
+                  }
+                </div>
+              </fieldset>
             }
 
           </div>
@@ -209,6 +199,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Policy number is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.offer_detail?.policy_number}
                 type="text"
                 placeholder="e.g. SGS-11288/12334"
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -228,6 +219,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Insured is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.offer_detail?.insured_by}
                 type="text"
                 placeholder="e.g. ECG Ghana"
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -245,6 +237,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Sum insured is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.sum_insured}
                 type="text"
                 placeholder="e.g. ECG Ghana"
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -264,6 +257,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Premium is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.premium}
                 type="number"
                 placeholder="e.g. 1200"
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -280,6 +274,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Rate is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.rate}
                 type="number"
                 step="0.1"
                 placeholder="e.g. 12.5"
@@ -299,6 +294,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Facultative offer is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.facultative_offer}
                 type="number"
                 step="0.1"
                 placeholder="e.g. 12.5"
@@ -316,6 +312,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Commission is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.commission}
                 type="number"
                 step="0.1"
                 placeholder="e.g. 12.5"
@@ -334,6 +331,8 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Currency is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.offer_detail?.currency}
+                // value={singleOffer?.data?.data?.offer_detail?.currency}
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Selct Currency</option>
                 {
@@ -357,6 +356,8 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Period start is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.offer_detail?.period_of_insurance_from}
+                // value={singleOffer?.data?.data?.offer_detail?.period_of_insurance_from}
                 type="date"
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -372,6 +373,8 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                   required: "Period end is required"
                 })
                 }
+                defaultValue={singleOffer?.data?.data?.offer_detail?.period_of_insurance_to}
+                // value={singleOffer?.data?.data?.offer_detail?.period_of_insurance_to}
                 type="date"
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -389,7 +392,8 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
                 required: false
               })
               }
-              defaultValue={""}
+              defaultValue={singleOffer?.data?.data?.offer_detail?.offer_comment}
+              // value={singleOffer?.data?.data?.offer_detail?.offer_comment}
               placeholder="Enter comments here"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
             ></textarea>
@@ -403,8 +407,8 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
           >
             Cancel
           </button>
-          <button onClick={handleSubmit(createCedantOffer)} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
-            {businessMutation.isLoading ? "Setting up offer..." : "Create Business"}
+          <button onClick={handleSubmit(updateCedantOffer)} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+            {businessUpdateMutation.isLoading ? "Updating offer..." : "Update Business"}
           </button>
         </div>
       </div>

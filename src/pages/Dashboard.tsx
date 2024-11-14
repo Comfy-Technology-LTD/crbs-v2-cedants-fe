@@ -20,12 +20,14 @@ import moment from "moment";
 import Loading from "../components/commons/Loading";
 import BusinessEditModal from "../components/commons/BusinessEditModal";
 import { useSearchParams } from "react-router-dom";
+import PlacingSlipModal from "../components/commons/PlacingSlipModal";
 
 const Dashboard: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isRedeemModalOpen, setRedeemModalOpen] = useState(false);
   const [toggleEye, setToggleEye] = useState(false);
+  const [placingSlipModal, setPlacingSlipModal] = useState(false)
   const [statsData, setStatsData] = useState([
     { title: "Total Offers", value: 0, icon: <FaHandshake /> },
     { title: "Total Open Offers", value: 0, icon: <FaFolderOpen /> },
@@ -35,16 +37,24 @@ const Dashboard: React.FC = () => {
     { title: "Total Paid Offers", value: 0, icon: <FaDollarSign /> },
   ])
 
-  const [,setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
 
   const toggleModal = () => setIsOpen(!isOpen);
-  const toggleEditModal = (id: number) => {
-    setIsEditOpen(!isOpen);
+  const toggleEditModal = (id: string) => {
+    setIsEditOpen(!isEditOpen);
     setSearchParams({
-     id: id
+      _content: id
     })
 
   };
+
+  const togglePlacingSlipModal = (id: string) => {
+    setSearchParams({
+      _content: id
+    })
+    setPlacingSlipModal(!placingSlipModal);
+    
+  }
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -63,7 +73,7 @@ const Dashboard: React.FC = () => {
     }
   })
 
-  const { data: offerStatsData, isLoading: isOfferStatsLoading, isFetched: isOfferStatsFetched, refetch: statsRefetch } = useQuery<OfferStatsRootProps>({
+  const { data: offerStatsData, isFetched: isOfferStatsFetched, refetch: statsRefetch } = useQuery<OfferStatsRootProps>({
     queryKey: ['offerStats'],
     queryFn: () => {
       return apiInstance.get('api/v1/offer-stats', {
@@ -75,8 +85,13 @@ const Dashboard: React.FC = () => {
   })
 
   useEffect(() => {
+    if (!isEditOpen && !placingSlipModal) {
+      setSearchParams({})
+    }
+  }, [isEditOpen, setSearchParams, placingSlipModal])
+
+  useEffect(() => {
     console.log(offerStatsData)
-    // setStatsData((prev) => )
   }, [isOfferStatsFetched, offerStatsData])
 
   useEffect(() => {
@@ -96,7 +111,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     refetch()
     statsRefetch()
-  }, [isOpen, refetch, currentPage, statsRefetch])
+  }, [isOpen, refetch, currentPage, statsRefetch, isEditOpen])
 
   if (isLoading) {
     return (
@@ -260,6 +275,8 @@ const Dashboard: React.FC = () => {
                     <tr className="bg-gray-200 text-gray-600 text-sm leading-normal">
                       <th className="py-3 px-6 text-left">Policy Number</th>
                       <th className="py-3 px-6 text-left">Insured</th>
+                      <th className="py-3 px-6 text-left">Class of Business</th>
+                      <th className="py-3 px-6 text-left">Currency</th>
                       <th className="py-3 px-6 text-left">Sum Insured</th>
                       <th className="py-3 px-6 text-left">Premium</th>
                       <th className="py-3 px-6 text-left">Offer Status</th>
@@ -276,8 +293,10 @@ const Dashboard: React.FC = () => {
                       >
                         <td className="py-3 px-6 text-left">{item?.offer_detail.policy_number}</td>
                         <td className="py-3 px-6 text-left">{item?.offer_detail?.insured_by}</td>
-                        <td className="py-3 px-6 text-left">{item?.sum_insured}</td>
-                        <td className="py-3 px-6 text-left">{item.premium}</td>
+                        <td className="py-3 px-6 text-left">{item?.class_of_business?.business_name}</td>
+                        <td className="py-3 px-6 text-left">{item?.offer_detail?.currency}</td>
+                        <td className="py-3 px-6 text-left">{item?.sum_insured.toLocaleString()}</td>
+                        <td className="py-3 px-6 text-left">{item.premium.toLocaleString()}</td>
                         <td className="py-3 px-6 text-left">
                           <span className="px-2 py-1 rounded-full bg-orange-700 text-white text-xs font-semibold">
                             {item?.offer_status}
@@ -290,9 +309,9 @@ const Dashboard: React.FC = () => {
                         </td>
                         <td className="py-3 px-6 text-left">{moment(item?.created_at).format("MMM Do YYYY")}</td>
                         <td className="py-3 px-6 flex text-left space-x-2">
-                          <DropDownButton />
+                          <DropDownButton show_placing={() => togglePlacingSlipModal(item?.id.toString())} />
                           <button
-                            onClick={toggleEditModal(item?.id)}
+                            onClick={() => toggleEditModal(item?.id.toString())}
                             className="flex items-center px-3 py-1 bg-orange-500 text-white rounded-md text-xs hover:bg-orange-600 transition"
                           >
                             Edit
@@ -338,8 +357,15 @@ const Dashboard: React.FC = () => {
       {isRedeemModalOpen && (
         <RedeemPointsModal close={() => setRedeemModalOpen(false)} />
       )}
+      {
+        placingSlipModal && (
+          <PlacingSlipModal close={() => setPlacingSlipModal(false)} />
+        )
+      }
     </div>
   );
 };
+
+
 
 export default Dashboard;

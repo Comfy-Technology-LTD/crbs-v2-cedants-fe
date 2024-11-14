@@ -6,6 +6,7 @@ export interface BusinessStatsProps {
 
 export interface BusinessModalProp {
   close: () => void;
+  closeState?: boolean
 }
 
 export interface RegisterProps {
@@ -82,6 +83,7 @@ export interface BusinessProps {
 
 export interface BusinessDetailProps {
   keydetail: string;
+  value?: string;
 }
 
 export interface OfferResponse {
@@ -104,6 +106,12 @@ export interface Data {
     to: number;
     total: number;
   };
+}
+
+export interface SingleOfferResponse {
+  data: {
+    data: Offer
+  }
 }
 
 export interface Offer {
@@ -142,6 +150,7 @@ export interface Insurer {
 export interface ClassOfBusiness {
   id: number;
   business_name: string;
+  business_details: string;
 }
 
 export interface Link {
@@ -154,6 +163,11 @@ export interface OfferDetail {
   id: number;
   policy_number: string;
   insured_by: string;
+  currency: string;
+  offer_comment: string;
+  period_of_insurance_from: string;
+  period_of_insurance_to: string;
+  offer_details: string;
 }
 
 export interface OfferStatsRootProps {
@@ -169,4 +183,9 @@ export interface OfferStatsProps {
     total_unpaid_offers: number;
     total_paid_or_partpayment_offers: number;
   };
+}
+
+export interface DropdownButtonProps {
+  show_placing?: () => void
+  show_notes?: () => void
 }
