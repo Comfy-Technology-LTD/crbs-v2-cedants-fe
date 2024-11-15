@@ -2,27 +2,39 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import apiInstance from "../../util";
 import Loading from "./Loading";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 const PlacingSlipModal: React.FC<{ close: () => void }> = ({ close }) => {
   const [searchParams] = useSearchParams()
 
-  const { data, isLoading} = useQuery({
+  const { data, isLoading, isError, isRefetching} = useQuery({
     queryKey: ['placingSlip'],
-    queryFn: () => {
+    queryFn: async () => {
       const params = searchParams.get('_content')
-      return apiInstance.get(`api/v1/generate-placing-slip/${params}`, {
+      const response = await apiInstance.get(`api/v1/generate-placing-slip/${params}`, {
         headers: {
-          'Content-Type': 'text/html',
+          'Content-Type': 'application/pdf',
           'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
-        }
+        },
+        responseType: 'blob'
       })
+
+      return URL.createObjectURL(response?.data)
     }
   })
 
-  if (isLoading) {
+
+  if (isLoading || isRefetching) {
     return (
       <Loading title="Preparing your placing slip" />
     )
+  }
+
+  if (isError) {
+     return  toast.warn("Error", {
+      theme: "colored"
+     })
   }
 
 
@@ -54,7 +66,7 @@ const PlacingSlipModal: React.FC<{ close: () => void }> = ({ close }) => {
         </div>
 
         <div className="border h-[50vh]">
-          <iframe srcDoc={data?.data} width="100%" height="850" frameBorder="0">
+          <iframe src={data} width="100%" height="750" className="border-none">
           </iframe>
         </div>
 
