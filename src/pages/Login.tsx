@@ -1,31 +1,55 @@
 import { useEffect, useState } from "react";
 import { LOGO } from "../constants";
 import { useNavigate } from "react-router-dom";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { LoginProps } from "../interfaces";
+import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState<string>("")
-  const [password, setPassword] = useState<string>("")
   const navigate = useNavigate()
-  const [saveTestUser, setSaveTestUser] = useState(localStorage.getItem("test-token") || null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginProps>()
+  const { login, isAuthenticated } = useAuth()
 
-  const handleTestLogin = () => {
-    if (email == "" || password == "") {
-      toast.warn("Enter email and password")
-      return;
-    }
-
-    if (email == "test@visalre.com" && password == "test") {
-      localStorage.setItem("test-token", "test-1111");
+  const handleLoginToPlaceIt: SubmitHandler<LoginProps> = async (data) => {
+    setIsLoading(true)
+    try {
+      await login(data.email, data.password)
+      setIsLoading(false)
       navigate("/dashboard", { replace: true })
+    } 
+    catch (error: AxiosError) 
+    {
+      setIsLoading(false)
+
+      if (error?.status === 422) {
+        toast.warn(error?.response.data.message, {
+          theme: "colored"
+        })
+      }
+       else {
+        console.log(error)
+        toast.warn("Login failed", {
+          theme: "colored"
+        })
+       }
+     
     }
+
+    // if (data.email == "test@visalre.com" && data.password == "test") {
+    //   localStorage.setItem("test-token", "test-1111");
+    //   navigate("/dashboard", { replace: true })
+    // }
   }
 
   useEffect(() => {
-    if (saveTestUser) {
+    console.log(isAuthenticated)
+    if (isAuthenticated) {
       navigate("/dashboard", { replace: true })
     }
-  }, [setSaveTestUser])
+  }, [isAuthenticated, navigate])
 
 
 
@@ -37,21 +61,31 @@ const Login: React.FC = () => {
       <input
         type="email"
         placeholder="Email"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
+        {
+        ...register("email", {
+          required: "Email is required"
+        })
+        }
         className="border w-full h-12 rounded-md pl-4 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
+      {errors?.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+
       <input
         type="password"
         placeholder="Password"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
+        {
+        ...register("password", {
+          required: "Password is required"
+        })
+        }
         className="border w-full h-12 rounded-md pl-4 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
+      {errors?.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+
       <input
-        onClick={handleTestLogin}
+        onClick={handleSubmit(handleLoginToPlaceIt)}
         type="button"
-        value="Login"
+        value={`${isLoading ? 'Loading...' : 'Login'}`}
         className="bg-blue-700 text-white w-full h-12 rounded-md font-semibold hover:bg-blue-800 cursor-pointer transition duration-200"
       />
       <a className="text-center text-blue-700" href="">Forgot password?</a>

@@ -27,7 +27,7 @@ const Header = () => {
         </div>
 
         {
-          saveTestUser && (
+         
             <div className="flex items-center">
               <div className="relative">
                 <div className="flex items-center cursor-pointer" onClick={toggleMenu}>
@@ -62,7 +62,6 @@ const Header = () => {
                 )}
               </div>
             </div>
-          )
         }
 
       </div>

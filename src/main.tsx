@@ -12,6 +12,11 @@ import RedeemedPoints from './pages/RedeemedPoints.tsx'
 import Profile from './pages/Profile.tsx'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AuthProvider } from './context/AuthContext.tsx'
+import Loading from './components/commons/Loading.tsx'
+
+const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
   {
@@ -47,12 +52,16 @@ const router = createBrowserRouter([
         element: <Profile />
       }
     ]
-  },
+  }
 ])
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
-    <ToastContainer />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <ToastContainer />
+      </AuthProvider>
+    </QueryClientProvider>
   </StrictMode>,
 )
