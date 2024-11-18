@@ -21,7 +21,8 @@ const PlacingSlipModal: React.FC<{ close: () => void }> = ({ close }) => {
       })
 
       return URL.createObjectURL(response?.data)
-    }
+    },
+    refetchOnWindowFocus: false
   })
 
 

@@ -2,7 +2,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const apiInstance = axios.create({
-  baseURL: 'http://localhost:8000/', //move this to env
+  baseURL: 'http://192.168.100.79:8000/', //move this to env
   // timeout: 1000,
   headers: {
     'accept': 'application/json'
