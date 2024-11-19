@@ -1,12 +1,11 @@
 import { LOGO } from "../constants";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { CedantProps, RegisterProps } from "../interfaces";
+import { CedantProps, ErrorBag, ErrorResponse, RegisterProps } from "../interfaces";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import apiInstance, { errorHandler } from "../util";
 import { Bounce, toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
-import { Triangle } from "react-loader-spinner";
 import Loading from "../components/commons/Loading";
 
 const Register: React.FC = () => {
@@ -51,10 +50,10 @@ const Register: React.FC = () => {
         hideProgressBar: true
       });
     },
-    onError: (error: AxiosError) => {
+    onError: (error: AxiosError<ErrorResponse>) => {
       console.log(error)
       if (error?.status == 422) {
-        const errorBag = error?.response?.data?.errors;
+        const errorBag = error?.response?.data?.errors as ErrorBag;
         errorHandler(errorBag);
       }
     }

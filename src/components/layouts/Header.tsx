@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LOGO } from '../../constants'; // Import your logo here
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate()
-  const [saveTestUser] = useState(localStorage.getItem("test-token") || null)
+  const { logout, isAuthenticated, user } = useAuth()
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
+
+  useEffect(() => {
+    // window.location.reload()
+  }, [])
+
+  const abbreviationGenerator = (first_name: string, last_name: string) => {
+    return `${first_name.charAt(0)}${last_name.charAt(0)}`
+  }
 
   return (
     <div className="bg-[#F3F4F6] py-4 px-6">
@@ -27,41 +36,43 @@ const Header = () => {
         </div>
 
         {
-         
-            <div className="flex items-center">
-              <div className="relative">
-                <div className="flex items-center cursor-pointer" onClick={toggleMenu}>
-                  <div className="flex flex-col items-end mr-2">
-                    <h1 className="text-sm -mb-1 font-semibold hover:text-blue-600">
-                      Cole Baidoo
-                    </h1>
-                    <h3 className="text-xs font-extralight">Insurance Company A</h3>
-                    <span className="border px-3 text-xs text-white mr-2 shadow-md hover:bg-green-900 rounded-full bg-green-800 cursor-pointer">
-                      Active
-                    </span>
-                  </div>
-                  <div className="border-2 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-full w-14 h-14 flex justify-center items-center">
-                    <h3 className="text-2xl font-bold hover:text-white">CB</h3>
-                  </div>
+          isAuthenticated ?
+          <div className="flex items-center">
+            <div className="relative">
+              <div className="flex items-center cursor-pointer" onClick={toggleMenu}>
+                <div className="flex flex-col items-end mr-2">
+                  <h1 className="text-sm -mb-1 font-semibold hover:text-blue-600">
+                    {user?.assoc_first_name} { user?.assoc_last_name}
+                  </h1>
+                  <h3 className="text-xs font-extralight">{user?.insurer_company_name}</h3>
+                  <span className="border px-3 text-xs text-white mr-2 shadow-md hover:bg-green-900 rounded-full bg-green-800 cursor-pointer">
+                    Active
+                  </span>
                 </div>
-                {menuOpen && (
-                  <div className="absolute z-50 right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg">
-                    <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {
-                      navigate("/dashboard/redeemed-points")
-                      toggleMenu()
-                    }}>Redeemed Points</button>
-                    <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {
-                      navigate("/dashboard/profile")
-                      toggleMenu()
-                    }}>Profile</button>
-                    <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {
-                      localStorage.removeItem("test-token")
-                      navigate("/")
-                    }}>Logout</button>
-                  </div>
-                )}
+                <div className="border-2 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-full w-14 h-14 flex justify-center items-center">
+                  <h3 className="text-2xl font-bold hover:text-white">{ abbreviationGenerator(user?.assoc_first_name || "", user?.assoc_last_name || "") }</h3>
+                </div>
               </div>
+              {menuOpen && (
+                <div className="absolute z-50 right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg">
+                  <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {
+                    navigate("/dashboard/redeemed-points")
+                    toggleMenu()
+                  }}>Redeemed Points</button>
+                  <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {
+                    navigate("/dashboard/profile")
+                    toggleMenu()
+                  }}>Profile</button>
+                  <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={() => {
+                    logout()
+                    navigate("/")
+                  }}>Logout</button>
+                </div>
+              )}
             </div>
+          </div>
+          : ""
+         
         }
 
       </div>

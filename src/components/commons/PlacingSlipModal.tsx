@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import apiInstance from "../../util";
 import Loading from "./Loading";
-import { useEffect } from "react";
 import { toast } from "react-toastify";
 
 const PlacingSlipModal: React.FC<{ close: () => void }> = ({ close }) => {

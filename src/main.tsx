@@ -14,7 +14,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthContext.tsx'
-import Loading from './components/commons/Loading.tsx'
 
 const queryClient = new QueryClient()
 

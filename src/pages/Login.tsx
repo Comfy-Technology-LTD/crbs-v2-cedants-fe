@@ -5,13 +5,12 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { LoginProps } from "../interfaces";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
-import { AxiosError } from "axios";
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const { register, handleSubmit, formState: { errors } } = useForm<LoginProps>()
-  const { login, isAuthenticated } = useAuth()
+  const { login, user, isAuthenticated } = useAuth()
 
   const handleLoginToPlaceIt: SubmitHandler<LoginProps> = async (data) => {
     setIsLoading(true)
@@ -20,7 +19,7 @@ const Login: React.FC = () => {
       setIsLoading(false)
       navigate("/dashboard", { replace: true })
     } 
-    catch (error: AxiosError) 
+    catch (error: any ) 
     {
       setIsLoading(false)
 
@@ -37,19 +36,16 @@ const Login: React.FC = () => {
        }
      
     }
-
-    // if (data.email == "test@visalre.com" && data.password == "test") {
-    //   localStorage.setItem("test-token", "test-1111");
-    //   navigate("/dashboard", { replace: true })
-    // }
   }
 
   useEffect(() => {
     console.log(isAuthenticated)
     if (isAuthenticated) {
       navigate("/dashboard", { replace: true })
+    } else {
+      console.log("Not authenticated ", JSON.stringify(user))
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate, user])
 
 
 

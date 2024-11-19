@@ -1,4 +1,4 @@
-import { BusinessDetailProps, BusinessModalProp, BusinessProps, CurrencyProps, OfferProps, SingleOfferResponse } from "../../interfaces";
+import { BusinessDetailProps, BusinessModalProp, BusinessProps, CurrencyProps, ErrorBag, ErrorResponse, OfferProps, SingleOfferResponse } from "../../interfaces";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CURRENCY } from "../../constants/currency";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -6,13 +6,18 @@ import apiInstance, { errorHandler } from "../../util";
 import { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import Loading from "./Loading";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import JoditEditor from "jodit-react";
+
+
 
 const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
 
+  const editor = useRef(null);
+  const [content, setContent] = useState('');
   const { register, handleSubmit, formState: { errors } } = useForm<OfferProps>()
-  const [businessDetailsPopulate, setBusinessDetailsPopulate] = useState<{ keydetail?: string; value?: string }>({});
+  const [businessDetailsPopulate, setBusinessDetailsPopulate] = useState<BusinessDetailProps[]>([]);
   const [searchParams] = useSearchParams()
 
   const { data, isLoading } = useQuery({
@@ -30,25 +35,22 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
     queryKey: ['singleOffer'],
     queryFn: () => {
       const param = searchParams.get('_content');
-      return apiInstance.get(`api/v1/offer/${param}`, {
-        headers: {
-          'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
-        }
-      })
+      return apiInstance.get(`api/v1/offer/${param}`)
     },
     refetchOnWindowFocus: false
   });
 
   useEffect(() => {
-    const details = singleOffer?.data?.data?.offer_detail.offer_details
-    setBusinessDetailsPopulate(JSON.parse(details || "[]"))
-  }, [isFetched, singleOffer?.data?.data?.offer_detail.offer_details])
+    const details = singleOffer?.data?.data?.offer_detail
+    setBusinessDetailsPopulate(JSON.parse(details?.offer_details || "[]"))
+    setContent(details?.offer_comment || "")
+  }, [isFetched, singleOffer?.data?.data?.offer_detail])
 
 
 
   const handleInputChange = (keydetail: string, value: string) => {
     setBusinessDetailsPopulate((prev) => {
-      const existingIndex = prev.findIndex((item) => item.keydetail === keydetail);
+      const existingIndex = prev.findIndex((item: BusinessDetailProps) => item.keydetail === keydetail);
       if (existingIndex !== -1) {
         const updatedEntries = [...prev];
         updatedEntries[existingIndex].value = value;
@@ -74,12 +76,12 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
         theme: 'colored',
         position: 'top-center'
       });
-      setBusinessDetailsPopulate({})
+      setBusinessDetailsPopulate([])
       close()
     },
-    onError: (error: AxiosError) => {
+    onError: (error: AxiosError<ErrorResponse>) => {
       if (error?.status == 422) {
-        const errorBag = error?.response?.data?.errors;
+        const errorBag = error?.response?.data?.errors as ErrorBag;
         errorHandler(errorBag);
       }
       console.log("Something went wrong")
@@ -89,6 +91,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
   const updateCedantOffer: SubmitHandler<OfferProps> = (data) => {
     data.class_of_businessesclass_of_business_id = singleOffer?.data?.data?.class_of_businessesclass_of_business_id.toString() || ""
     data.offer_details = JSON.stringify(businessDetailsPopulate)
+    data.offer_comment = content
     console.log(data)
     businessUpdateMutation.mutateAsync(data)
   }
@@ -385,8 +388,13 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
           </div>
 
           <div className="space-y-1 w-full">
-            <label className="block text-gray-600">Comment</label>
-            <textarea
+            <label className="block text-gray-600 mb-2 mt-2">Comment <span className="text-xs text-red-500 italic">* Copy and paste facultative details here</span></label>
+            <JoditEditor
+              ref={editor}
+              value={content}
+              onChange={e => setContent(e)}
+            />
+            {/* <textarea
               {
               ...register("offer_comment", {
                 required: false
@@ -396,7 +404,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
               // value={singleOffer?.data?.data?.offer_detail?.offer_comment}
               placeholder="Enter comments here"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
-            ></textarea>
+            ></textarea> */}
           </div>
         </div>
 

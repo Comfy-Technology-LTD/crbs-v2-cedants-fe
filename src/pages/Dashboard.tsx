@@ -21,13 +21,15 @@ import Loading from "../components/commons/Loading";
 import BusinessEditModal from "../components/commons/BusinessEditModal";
 import { useSearchParams } from "react-router-dom";
 import PlacingSlipModal from "../components/commons/PlacingSlipModal";
+import UploadDocumentsModal from "../components/commons/UploadDocumentsModal";
 
 const Dashboard: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isRedeemModalOpen, setRedeemModalOpen] = useState(false);
   const [toggleEye, setToggleEye] = useState(false);
-  const [placingSlipModal, setPlacingSlipModal] = useState(false)
+  const [placingSlipModal, setPlacingSlipModal] = useState(false);
   const [statsData, setStatsData] = useState([
     { title: "Total Offers", value: 0, icon: <FaHandshake /> },
     { title: "Total Open Offers", value: 0, icon: <FaFolderOpen /> },
@@ -35,7 +37,7 @@ const Dashboard: React.FC = () => {
     { title: "Total Closed Offers", value: 0, icon: <FaCheckCircle /> },
     { title: "Total Unpaid Offers", value: 0, icon: <FaTimesCircle /> },
     { title: "Total Paid Offers", value: 0, icon: <FaDollarSign /> },
-  ])
+  ]);
 
   const [, setSearchParams] = useSearchParams();
 
@@ -43,18 +45,23 @@ const Dashboard: React.FC = () => {
   const toggleEditModal = (id: string) => {
     setIsEditOpen(!isEditOpen);
     setSearchParams({
-      _content: id
-    })
-
+      _content: id,
+    });
   };
+
+  const toggleUploadDocumentModal = (id: string) => {
+    setSearchParams({
+      _content: id,
+    });
+    setIsUploadModalOpen(true)
+  }
 
   const togglePlacingSlipModal = (id: string) => {
     setSearchParams({
-      _content: id
-    })
+      _content: id,
+    });
     setPlacingSlipModal(!placingSlipModal);
-    
-  }
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -62,61 +69,83 @@ const Dashboard: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const { data: offerData, isLoading, refetch } = useQuery<OfferResponse>({
-    queryKey: ['fetchOffers'],
+  const {
+    data: offerData,
+    isLoading,
+    refetch,
+  } = useQuery<OfferResponse>({
+    queryKey: ["fetchOffers"],
     queryFn: () => {
-      return apiInstance.get(`api/v1/offer?page=${currentPage}`, {
-        headers: {
-          'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
-        }
-      });
-    }
-  })
+      return apiInstance.get(`api/v1/offer?page=${currentPage}`);
+    },
+  });
 
-  const { data: offerStatsData, isFetched: isOfferStatsFetched, refetch: statsRefetch } = useQuery<OfferStatsRootProps>({
-    queryKey: ['offerStats'],
+  const {
+    data: offerStatsData,
+    isFetched: isOfferStatsFetched,
+    refetch: statsRefetch,
+  } = useQuery<OfferStatsRootProps>({
+    queryKey: ["offerStats"],
     queryFn: () => {
-      return apiInstance.get('api/v1/offer-stats', {
-        headers: {
-          'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
-        }
-      });
-    }
-  })
+      return apiInstance.get("api/v1/offer-stats");
+    },
+  });
 
   useEffect(() => {
-    if (!isEditOpen && !placingSlipModal) {
-      setSearchParams({})
+    if (!isEditOpen && !placingSlipModal && !isUploadModalOpen) {
+      setSearchParams({});
     }
-  }, [isEditOpen, setSearchParams, placingSlipModal])
+  }, [isEditOpen, setSearchParams, placingSlipModal, isUploadModalOpen]);
 
   useEffect(() => {
-    console.log(offerStatsData)
-  }, [isOfferStatsFetched, offerStatsData])
+    console.log(offerStatsData);
+  }, [isOfferStatsFetched, offerStatsData]);
 
   useEffect(() => {
     if (isOfferStatsFetched && offerStatsData) {
       const offerDisaggregateData = offerStatsData?.data?.data;
       setStatsData([
-        { title: "Total Offers", value: offerDisaggregateData.total_offers, icon: <FaHandshake /> },
-        { title: "Total Open Offers", value: offerDisaggregateData.total_open_offers, icon: <FaFolderOpen /> },
-        { title: "Total Pending Offers", value: offerDisaggregateData.total_pending_offers, icon: <FaHourglassHalf /> },
-        { title: "Total Closed Offers", value: offerDisaggregateData.total_closed_offers, icon: <FaCheckCircle /> },
-        { title: "Total Unpaid Offers", value: offerDisaggregateData.total_unpaid_offers, icon: <FaTimesCircle /> },
-        { title: "Total Paid Offers", value: offerDisaggregateData.total_paid_or_partpayment_offers, icon: <FaDollarSign /> },
+        {
+          title: "Total Offers",
+          value: offerDisaggregateData.total_offers,
+          icon: <FaHandshake />,
+        },
+        {
+          title: "Total Open Offers",
+          value: offerDisaggregateData.total_open_offers,
+          icon: <FaFolderOpen />,
+        },
+        {
+          title: "Total Pending Offers",
+          value: offerDisaggregateData.total_pending_offers,
+          icon: <FaHourglassHalf />,
+        },
+        {
+          title: "Total Closed Offers",
+          value: offerDisaggregateData.total_closed_offers,
+          icon: <FaCheckCircle />,
+        },
+        {
+          title: "Total Unpaid Offers",
+          value: offerDisaggregateData.total_unpaid_offers,
+          icon: <FaTimesCircle />,
+        },
+        {
+          title: "Total Paid Offers",
+          value: offerDisaggregateData.total_paid_or_partpayment_offers,
+          icon: <FaDollarSign />,
+        },
       ]);
     }
   }, [isOfferStatsFetched, offerStatsData]);
 
   useEffect(() => {
-    refetch()
-    statsRefetch()
-  }, [isOpen, refetch, currentPage, statsRefetch, isEditOpen])
+    refetch();
+    statsRefetch();
+  }, [isOpen, refetch, currentPage, statsRefetch, isEditOpen]);
 
   if (isLoading) {
-    return (
-      <Loading title="A moment. Getting your dashboard ready.." />
-    )
+    return <Loading title="A moment. Getting your dashboard ready.." />;
   }
 
   return (
@@ -125,7 +154,8 @@ const Dashboard: React.FC = () => {
         <div className="h-auto max-w-lg flex flex-col p-6 rounded-lg bg-gradient-to-r from-white to-blue-50 shadow-lg">
           <div className="flex justify-between py-1">
             <span className="font-thin text-sm">
-              <span className=" font-semibold">Today:</span> {moment().format("MMM Do YYYY")}
+              <span className=" font-semibold">Today:</span>{" "}
+              {moment().format("MMM Do YYYY")}
             </span>
             <div>
               {toggleEye ? (
@@ -155,7 +185,6 @@ const Dashboard: React.FC = () => {
                     clipRule="evenodd"
                   />
                 </svg>
-
               )}
             </div>
           </div>
@@ -179,13 +208,13 @@ const Dashboard: React.FC = () => {
                     <h3 className="font-semibold text-sm text-gray-600">
                       Points Earned
                     </h3>
-                    {
-                      toggleEye ? (<h4 className="text-sm font-light text-gray-800">
+                    {toggleEye ? (
+                      <h4 className="text-sm font-light text-gray-800">
                         <CountUp end={45} />
-                      </h4>) : (
-                        <div className="border h-5 bg-gray-700"> </div>
-                      )
-                    }
+                      </h4>
+                    ) : (
+                      <div className="border h-5 bg-gray-700"> </div>
+                    )}
                   </div>
                 </div>
 
@@ -195,16 +224,14 @@ const Dashboard: React.FC = () => {
                     <h3 className="font-semibold text-sm text-gray-600">
                       Cash Earned
                     </h3>
-                    {
-                      toggleEye ? (
-                        <h4 className="text-sm font-light text-gray-800">
-                          GHC
-                          <CountUp end={5000} />
-                        </h4>
-                      ) : (
-                        <div className="border h-5 bg-gray-700"> </div>
-                      )
-                    }
+                    {toggleEye ? (
+                      <h4 className="text-sm font-light text-gray-800">
+                        GHC
+                        <CountUp end={5000} />
+                      </h4>
+                    ) : (
+                      <div className="border h-5 bg-gray-700"> </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -232,14 +259,22 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="p-6 bg-gray-50 shadow-lg ">
-        <div className={`flex ${offerData?.data?.data?.total === 0 ? "justify-end" : "justify-between"} items-center mb-4`}>
-          {
-            offerData?.data?.data?.total ?
-              <input
-                type="text"
-                placeholder="Search business"
-                className="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              /> : ""}
+        <div
+          className={`flex ${
+            offerData?.data?.data?.total === 0
+              ? "justify-end"
+              : "justify-between"
+          } items-center mb-4`}
+        >
+          {offerData?.data?.data?.total ? (
+            <input
+              type="text"
+              placeholder="Search business"
+              className="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          ) : (
+            ""
+          )}
           <div className="space-x-3 flex">
             <button
               onClick={toggleModal}
@@ -255,48 +290,64 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {
-          offerData?.data?.data?.total === 0 ? (
-            <div className="flex flex-col items-center py-6 space-y-2 max-w-md mx-auto mt-10">
-              <h1 className="text-2xl font-bold text-gray-800">No offers found for you yet!!</h1>
-              <p className="text-gray-600 text-center font-light px-6">Start now and stand the chance to win amazing prizes!</p>
-              <button
-                onClick={toggleModal}
-                className="mt-4 px-5 py-2 bg-green-500 text-white rounded-full shadow hover:bg-green-600 transition-colors duration-200">
-                Get Started
-              </button>
-            </div>
-
-          ) : (
-            <>
-              <div className="overflow-auto bg-white shadow-md rounded-lg">
-                <table className="min-w-full bg-white border">
-                  <thead>
-                    <tr className="bg-gray-200 text-gray-600 text-sm leading-normal">
-                      <th className="py-3 px-6 text-left">Policy Number</th>
-                      <th className="py-3 px-6 text-left">Insured</th>
-                      <th className="py-3 px-6 text-left">Class of Business</th>
-                      <th className="py-3 px-6 text-left">Currency</th>
-                      <th className="py-3 px-6 text-left">Sum Insured</th>
-                      <th className="py-3 px-6 text-left">Premium</th>
-                      <th className="py-3 px-6 text-left">Offer Status</th>
-                      <th className="py-3 px-6 text-left">Payment Status</th>
-                      <th className="py-3 px-6 text-left">Business Date</th>
-                      <th className="py-3 px-6 text-left">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-600 text-sm font-light">
-                    {offerData?.data?.data?.data.map((item: Offer, index: number) => (
+        {offerData?.data?.data?.total === 0 ? (
+          <div className="flex flex-col items-center py-6 space-y-2 max-w-md mx-auto mt-10">
+            <h1 className="text-2xl font-bold text-gray-800">
+              No offers found for you yet!!
+            </h1>
+            <p className="text-gray-600 text-center font-light px-6">
+              Start now and stand the chance to win amazing prizes!
+            </p>
+            <button
+              onClick={toggleModal}
+              className="mt-4 px-5 py-2 bg-green-500 text-white rounded-full shadow hover:bg-green-600 transition-colors duration-200"
+            >
+              Get Started
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-auto bg-white shadow-md rounded-lg">
+              <table className="min-w-full bg-white border">
+                <thead>
+                  <tr className="bg-gray-200 text-gray-600 text-sm leading-normal">
+                    <th className="py-3 px-6 text-left">Policy Number</th>
+                    <th className="py-3 px-6 text-left">Insured</th>
+                    <th className="py-3 px-6 text-left">Class of Business</th>
+                    <th className="py-3 px-6 text-left">Currency</th>
+                    <th className="py-3 px-6 text-left">Sum Insured</th>
+                    <th className="py-3 px-6 text-left">Premium</th>
+                    <th className="py-3 px-6 text-left">Offer Status</th>
+                    <th className="py-3 px-6 text-left">Payment Status</th>
+                    <th className="py-3 px-6 text-left">Business Date</th>
+                    <th className="py-3 px-6 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-600 text-sm font-light">
+                  {offerData?.data?.data?.data.map(
+                    (item: Offer, index: number) => (
                       <tr
                         key={index}
                         className="border-b border-gray-200 hover:bg-gray-100"
                       >
-                        <td className="py-3 px-6 text-left">{item?.offer_detail.policy_number}</td>
-                        <td className="py-3 px-6 text-left">{item?.offer_detail?.insured_by}</td>
-                        <td className="py-3 px-6 text-left">{item?.class_of_business?.business_name}</td>
-                        <td className="py-3 px-6 text-left">{item?.offer_detail?.currency}</td>
-                        <td className="py-3 px-6 text-left">{item?.sum_insured.toLocaleString()}</td>
-                        <td className="py-3 px-6 text-left">{item.premium.toLocaleString()}</td>
+                        <td className="py-3 px-6 text-left">
+                          {item?.offer_detail.policy_number}
+                        </td>
+                        <td className="py-3 px-6 text-left">
+                          {item?.offer_detail?.insured_by}
+                        </td>
+                        <td className="py-3 px-6 text-left">
+                          {item?.class_of_business?.business_name}
+                        </td>
+                        <td className="py-3 px-6 text-left">
+                          {item?.offer_detail?.currency}
+                        </td>
+                        <td className="py-3 px-6 text-left">
+                          {item?.sum_insured.toLocaleString()}
+                        </td>
+                        <td className="py-3 px-6 text-left">
+                          {item.premium.toLocaleString()}
+                        </td>
                         <td className="py-3 px-6 text-left">
                           <span className="px-2 py-1 rounded-full bg-orange-700 text-white text-xs font-semibold">
                             {item?.offer_status}
@@ -307,65 +358,91 @@ const Dashboard: React.FC = () => {
                             {item?.payment_status}
                           </span>
                         </td>
-                        <td className="py-3 px-6 text-left">{moment(item?.created_at).format("MMM Do YYYY")}</td>
+                        <td className="py-3 px-6 text-left">
+                          {moment(item?.created_at).format("MMM Do YYYY")}
+                        </td>
                         <td className="py-3 px-6 flex text-left space-x-2">
-                          <DropDownButton show_placing={() => togglePlacingSlipModal(item?.id.toString())} />
+                          <DropDownButton
+                            show_placing={() =>
+                              togglePlacingSlipModal(item?.id.toString())
+                            }
+                          />
                           <button
                             onClick={() => toggleEditModal(item?.id.toString())}
                             className="flex items-center px-3 py-1 bg-orange-500 text-white rounded-md text-xs hover:bg-orange-600 transition"
                           >
                             Edit
                           </button>
+                          <button onClick={() => toggleUploadDocumentModal(item?.id.toString())} className="flex items-center px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1}
+                              stroke="currentColor"
+                              className="size-5"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"
+                              />
+                            </svg>
+                          </button>
                         </td>
                       </tr>
-                    ))}
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-                  </tbody>
-                </table>
+            <div className="flex justify-between items-center py-4">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={offerData?.data?.data?.current_page === 1}
+                className={`px-3 py-1 bg-gray-300 text-gray-700 rounded-md ${
+                  currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-400"
+                } transition`}
+              >
+                Previous
+              </button>
+              <div className="text-gray-700">
+                Page {offerData?.data?.data?.current_page} of{" "}
+                {offerData?.data?.data?.last_page}
               </div>
-
-              <div className="flex justify-between items-center py-4">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={offerData?.data?.data?.current_page === 1}
-                  className={`px-3 py-1 bg-gray-300 text-gray-700 rounded-md ${currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-400"
-                    } transition`}
-                >
-                  Previous
-                </button>
-                <div className="text-gray-700">
-                  Page {offerData?.data?.data?.current_page} of {offerData?.data?.data?.last_page}
-                </div>
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={offerData?.data?.data?.current_page === offerData?.data?.data?.last_page}
-                  className={`px-3 py-1 bg-gray-300 text-gray-700 rounded-md ${offerData?.data?.data?.current_page === offerData?.data?.data?.last_page
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={
+                  offerData?.data?.data?.current_page ===
+                  offerData?.data?.data?.last_page
+                }
+                className={`px-3 py-1 bg-gray-300 text-gray-700 rounded-md ${
+                  offerData?.data?.data?.current_page ===
+                  offerData?.data?.data?.last_page
                     ? "cursor-not-allowed"
                     : "hover:bg-gray-400"
-                    } transition`}
-                >
-                  Next
-                </button>
-              </div>
-            </>
-          )
-        }
-
+                } transition`}
+              >
+                Next
+              </button>
+            </div>
+          </>
+        )}
       </div>
       {isOpen && <BusinessModal close={() => setIsOpen(false)} />}
       {isEditOpen && <BusinessEditModal close={() => setIsEditOpen(false)} />}
       {isRedeemModalOpen && (
         <RedeemPointsModal close={() => setRedeemModalOpen(false)} />
       )}
+      {placingSlipModal && (
+        <PlacingSlipModal close={() => setPlacingSlipModal(false)} />
+      )}
       {
-        placingSlipModal && (
-          <PlacingSlipModal close={() => setPlacingSlipModal(false)} />
-        )
+        isUploadModalOpen && <UploadDocumentsModal close={() => setIsUploadModalOpen(false)} />
       }
     </div>
   );
 };
-
-
 
 export default Dashboard;

@@ -38,6 +38,7 @@ export interface User {
   assoc_email: string;
   position: string;
   name: string;
+  insurer_company_name: string
 }
 
 export interface CedantProps {
@@ -82,7 +83,7 @@ export interface BusinessProps {
 }
 
 export interface BusinessDetailProps {
-  keydetail: string;
+  keydetail?: string;
   value?: string;
 }
 
@@ -189,3 +190,10 @@ export interface DropdownButtonProps {
   show_placing?: () => void
   show_notes?: () => void
 }
+
+export interface ErrorResponse {
+  errors: Record<string, string[]>; // Adjust based on the actual structure of errors
+}
+
+export type ErrorBag = Record<string, string[]>;
+

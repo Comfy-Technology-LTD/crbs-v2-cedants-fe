@@ -1,4 +1,4 @@
-import { BusinessDetailProps, BusinessModalProp, BusinessProps, CurrencyProps, OfferProps } from "../../interfaces";
+import { BusinessDetailProps, BusinessModalProp, BusinessProps, CurrencyProps, ErrorBag, ErrorResponse, OfferProps } from "../../interfaces";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CURRENCY } from "../../constants/currency";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -6,9 +6,12 @@ import apiInstance, { errorHandler } from "../../util";
 import { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import Loading from "./Loading";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import JoditEditor from "jodit-react";
 
 const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
+  const editor = useRef(null);
+  const [content, setContent] = useState('');
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<OfferProps>()
   const [businessDetails, setBusinessDetails] = useState<BusinessDetailProps[]>()
@@ -17,12 +20,14 @@ const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
     queryKey: ['businesses'],
     queryFn: () => {
       return apiInstance.get('api/v1/business', {
-        headers: {
-          'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
-        }
+        // headers: {
+        //   'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
+        // }
       })
     }
   });
+
+  // const config = useMemo({}, []);
 
   const handleInputChange = (keydetail: string, value: string) => {
     setBusinessDetailsPopulate((prev) => {
@@ -41,9 +46,9 @@ const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
     mutationKey: ['businesMutate'],
     mutationFn: (data: OfferProps) => {
       return apiInstance.post("/api/v1/offer", data, {
-        headers: {
-          'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
-        }
+        // headers: {
+        //   'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
+        // }
       })
     },
     onSuccess: (data) => {
@@ -68,9 +73,9 @@ const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
       })
       close()
     },
-    onError: (error: AxiosError) => {
+    onError: (error: AxiosError<ErrorResponse>) => {
       if (error?.status == 422) {
-        const errorBag = error?.response?.data?.errors;
+        const errorBag = error?.response?.data?.errors as ErrorBag;
         errorHandler(errorBag);
       }
       console.log("Something went wrong")
@@ -80,7 +85,7 @@ const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
   const createCedantOffer: SubmitHandler<OfferProps> = (data) => {
     data.class_of_businessesclass_of_business_id = JSON.parse(data.class_of_businessesclass_of_business_id).id
     data.offer_details = JSON.stringify(businessDetailsPopulate)
-    console.log(data)
+    data.offer_comment = content
     businessMutation.mutateAsync(data)
   }
 
@@ -163,7 +168,7 @@ const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
                               <div key={key}>
                                 <label className="block text-gray-600 mb-1">{business.keydetail}</label>
                                 <input
-                                  onChange={(e) => handleInputChange(business.keydetail, e.target.value)}
+                                  onChange={(e) => handleInputChange(business.keydetail as string, e.target.value)}
                                   type="text"
                                   placeholder={`e.g. ${business.keydetail}`}
                                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -302,7 +307,7 @@ const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
                       errors?.commission && <p className="text-red-500 text-sm">{errors?.commission.message}</p>
                     }
                   </div>
-                  
+
                   <div className="space-y-1 col-span-2 w-full">
                     <label className="block text-gray-600">Currency</label>
                     <select
@@ -359,8 +364,13 @@ const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
                 </div>
 
                 <div className="space-y-1 w-full">
-                  <label className="block text-gray-600">Comment</label>
-                  <textarea
+                  <label className="block text-gray-600 mb-2 mt-2">Comment <span className="text-xs text-red-500 italic">* Copy and paste facultative details here</span> </label>
+                  <JoditEditor
+                    ref={editor}
+                    value={content}
+                    onChange={e => setContent(e)}
+                  />
+                  {/* <textarea
                     {
                     ...register("offer_comment", {
                       required: false
@@ -369,7 +379,7 @@ const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
                     defaultValue={""}
                     placeholder="Enter comments here"
                     className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
-                  ></textarea>
+                  ></textarea> */}
                 </div>
               </div>
 
