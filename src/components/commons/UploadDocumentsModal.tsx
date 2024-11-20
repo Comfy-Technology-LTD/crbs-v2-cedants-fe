@@ -46,14 +46,14 @@ const UploadDocumentsModal: React.FC<UploadDocumentsModalProps> = ({
       }
 
       const formData = new FormData();
-      Array.from(uploadFiles).forEach((file) => {
-        formData.append("files", file);
+      Array.from(uploadFiles).forEach((file, key) => {
+        formData.append(`files${key}`, file);
       });
 
       return apiInstance.post(`/api/v1/offer-files/${param}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        // headers: {
+        //   "Content-Type": "multipart/form-data",
+        // },
         onUploadProgress: (progressEvent) => {
           const percentage = Math.round(
             (progressEvent.loaded * 100) / (progressEvent.total || 1)
@@ -62,11 +62,13 @@ const UploadDocumentsModal: React.FC<UploadDocumentsModalProps> = ({
         },
       });
     },
-    onSuccess: () => {
-      toast.success("Upload successful", {
+    onSuccess: (data) => {
+      console.log(data)
+      toast.success(data?.data?.message, {
         theme: "colored",
       });
       setProgressPercentage(0)
+      setUploadFiles(null)
     },
     onError: (error) => {
       console.log(error);
@@ -74,6 +76,7 @@ const UploadDocumentsModal: React.FC<UploadDocumentsModalProps> = ({
         theme: "colored",
       });
       setProgressPercentage(0)
+      setUploadFiles(null)
     },
   });
 
@@ -257,11 +260,13 @@ const UploadDocumentsModal: React.FC<UploadDocumentsModalProps> = ({
                       </div>
                     ))}
                   </div>
+                  <div className=" flex justify-end mt-2">
+                    <span className="text-xs font-thin">Count: {uploadFiles?.length}</span>
+                  </div>
                 </div>
               ) : (
                 ""
               )
-
             }
           </div>
         </div>

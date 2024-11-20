@@ -15,7 +15,7 @@ const RedeemPointsModal: React.FC<RedeemPointsModalProps> = ({close}) => {
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Redeem Points</h2>
             
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label className="block text-gray-600 mb-1">Mode of Payment</label>
               <select 
                 value={paymentMode}
@@ -26,7 +26,7 @@ const RedeemPointsModal: React.FC<RedeemPointsModalProps> = ({close}) => {
                 <option value="mobileMoney">Mobile Money</option>
                 <option value="bankTransfer">Bank Transfer</option>
               </select>
-            </div>
+            </div> */}
 
             <div className="mb-4">
               <label className="block text-gray-600 mb-1">Points to Redeem</label>

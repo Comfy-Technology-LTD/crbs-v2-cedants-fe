@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { LOGO } from '../../constants'; // Import your logo here
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { abbreviationGenerator } from '../../util';
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -14,9 +15,7 @@ const Header = () => {
     // window.location.reload()
   }, [])
 
-  const abbreviationGenerator = (first_name: string, last_name: string) => {
-    return `${first_name.charAt(0)}${last_name.charAt(0)}`
-  }
+
 
   return (
     <div className="bg-[#F3F4F6] py-4 px-6">

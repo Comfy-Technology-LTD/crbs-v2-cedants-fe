@@ -3,41 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import apiInstance from "../../util";
 import Loading from "./Loading";
 import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+import { PDFICON } from "../../constants";
 
 const PlacingSlipModal: React.FC<{ close: () => void }> = ({ close }) => {
-  const [searchParams] = useSearchParams()
 
-  const { data, isLoading, isError, isRefetching} = useQuery({
-    queryKey: ['placingSlip'],
-    queryFn: async () => {
-      const params = searchParams.get('_content')
-      const response = await apiInstance.get(`api/v1/generate-placing-slip/${params}`, {
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
-        },
-        responseType: 'blob'
-      })
-
-      return URL.createObjectURL(response?.data)
-    },
-    refetchOnWindowFocus: false
-  })
-
-
-  if (isLoading || isRefetching) {
-    return (
-      <Loading title="Preparing your placing slip" />
-    )
-  }
-
-  if (isError) {
-     return  toast.warn("Error", {
-      theme: "colored"
-     })
-  }
-
-
+  const [tab, setTab] = useState<number>(1);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 px-4">
@@ -45,7 +16,9 @@ const PlacingSlipModal: React.FC<{ close: () => void }> = ({ close }) => {
         <div className="border-b flex justify-between py-2">
           <div>
             <h2 className="text-2xl font-semibold text-gray-800 ">
-              Preview placing slip
+              Preview {
+                tab == 1 ? "placing slip" : "supporting documents"
+              }
             </h2>
           </div>
           <div>
@@ -65,14 +38,141 @@ const PlacingSlipModal: React.FC<{ close: () => void }> = ({ close }) => {
           </div>
         </div>
 
-        <div className="border h-[50vh]">
-          <iframe src={data} width="100%" height="750" className="border-none">
-          </iframe>
+        <div>
+          <div className="flex sspace-x-5">
+            <div onClick={() => setTab(1)} className={`flex-1 ${tab == 1 ? "border-b-2 border-b-[#3C667B]" : ""} hover:bg-gray-300 hover:text-[#76a5bc] transition-all duration-500 text-center py-2 font-semibold text-[#3C667B] cursor-pointer`}>Placing slips</div>
+            <div onClick={() => setTab(2)} className={`flex-1 ${tab == 2 ? "border-b-2 border-b-[#3C667B]" : ""} hover:bg-gray-300 hover:text-[#76a5bc] transition-all duration-500 text-center py-2 font-semibold text-[#3C667B] cursor-pointer`}>Supporting documents</div>
+          </div>
         </div>
 
+        {
+          tab == 1 ? (
+            <PlacingView />
+          ) : ""
+        }
+
+        {
+          tab == 2 ? (
+            <SupportingDocumentView />
+          ) : ""
+        }
 
       </div>
     </div>
+  )
+}
+
+const PlacingView: React.FC = () => {
+  const [searchParams] = useSearchParams()
+
+  const { data, isLoading, isError, isRefetching } = useQuery({
+    queryKey: ['placingSlip'],
+    queryFn: async () => {
+      const params = searchParams.get('_content')
+      const response = await apiInstance.get(`api/v1/generate-placing-slip/${params}`, {
+        headers: {
+          'Content-Type': 'application/pdf'
+        },
+        responseType: 'blob'
+      })
+      console.log(response?.data);
+      return URL.createObjectURL(response?.data)
+    },
+    refetchOnWindowFocus: false
+  })
+
+
+  if (isLoading || isRefetching) {
+    return (
+      <Loading title="Preparing your placing slip" />
+    )
+  }
+
+  if (isError) {
+    return toast.warn("Error", {
+      theme: "colored"
+    })
+  }
+
+  return (
+    <div className="border h-[50vh]">
+      <iframe src={data} width="100%" height="750" className="border-none">
+      </iframe>
+    </div>
+  )
+}
+
+const SupportingDocumentView: React.FC = () => {
+  const [searchParams] = useSearchParams()
+
+  const { data, isLoading, isError, isRefetching, refetch } = useQuery({
+    queryKey: ['supportingSlip'],
+    enabled: false,
+    queryFn: async () => {
+      const params = searchParams.get('_content')
+      const response = await apiInstance.get(`api/v1/generate-supporting-docs/${params}`, {
+        headers: {
+          'Content-Type': 'application/pdf'
+        },
+        responseType: 'blob'
+      })
+
+      console.log(response?.data);
+      return URL.createObjectURL(response?.data)
+    },
+    refetchOnWindowFocus: false
+  },
+)
+
+  const { data: singleOffer, isLoading: isSingleLoading, isFetching } = useQuery<{ data: { data: number } }>({
+    queryKey: ['singleOffer'],
+    queryFn: () => {
+      const param = searchParams.get('_content');
+      return apiInstance.get(`api/v1/offer-docs-content/${param}`)
+    },
+    refetchOnWindowFocus: false
+  });
+
+  useEffect(() => {
+    if (singleOffer?.data?.data && singleOffer?.data?.data > 0) {
+      console.log("here ", singleOffer)
+      refetch()
+    }
+
+  }, [refetch, singleOffer])
+
+  if (isSingleLoading || isFetching) {
+    return <Loading title="Confirming documents availiability..." />
+  }
+
+  if (isRefetching) {
+    return (
+      <Loading title="Preparing your supporting documents" />
+    )
+  }
+
+  if (isError) {
+    return toast.warn("Error", {
+      theme: "colored"
+    })
+  }
+
+  return (
+    <>
+      {
+        singleOffer?.data?.data === 0 ? (
+          <div className="flex justify-center  items-center flex-col h-[50vh]">
+            <img className=" w-44" src={PDFICON} alt="No doc found" />
+            <h1 className=" text-xl font-semibold mt-2">No Attachments available</h1>
+            <p className=" text-lg font-extralight">Try adding some supporting documents</p>
+          </div>
+        ) :
+          (<div className="border h-[50vh]">
+            <iframe src={data} width="100%" height="750" className="border-none">
+            </iframe>
+          </div>)
+      }
+    </>
   )
 }
 

@@ -13,7 +13,6 @@ const apiInstance = axios.create({
 
 apiInstance.interceptors.request.use((config) => {
   const access_token = localStorage.getItem('__u_access_token')
-  console.log(access_token);
   if (access_token) {
     config.headers.Authorization = `Bearer ${access_token}`
   }
@@ -33,5 +32,8 @@ export const errorHandler = (errorBag: ErrorBag) => {
   })
 }
 
+export const abbreviationGenerator = (first_name: string, last_name: string) => {
+  return `${first_name.charAt(0)}${last_name.charAt(0)}`
+}
 
 export default apiInstance;

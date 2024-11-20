@@ -92,7 +92,6 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
     data.class_of_businessesclass_of_business_id = singleOffer?.data?.data?.class_of_businessesclass_of_business_id.toString() || ""
     data.offer_details = JSON.stringify(businessDetailsPopulate)
     data.offer_comment = content
-    console.log(data)
     businessUpdateMutation.mutateAsync(data)
   }
 

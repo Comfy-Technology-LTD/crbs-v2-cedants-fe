@@ -14,7 +14,7 @@ import BusinessModal from "../components/commons/BusinessModal";
 import RedeemPointsModal from "../components/commons/RedeemPointsModal";
 import DropDownButton from "../components/commons/DropdownButton";
 import { useQuery } from "@tanstack/react-query";
-import apiInstance from "../util";
+import apiInstance, { abbreviationGenerator } from "../util";
 import { Offer, OfferResponse, OfferStatsRootProps } from "../interfaces";
 import moment from "moment";
 import Loading from "../components/commons/Loading";
@@ -22,6 +22,7 @@ import BusinessEditModal from "../components/commons/BusinessEditModal";
 import { useSearchParams } from "react-router-dom";
 import PlacingSlipModal from "../components/commons/PlacingSlipModal";
 import UploadDocumentsModal from "../components/commons/UploadDocumentsModal";
+import { useAuth } from "../context/AuthContext";
 
 const Dashboard: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +39,8 @@ const Dashboard: React.FC = () => {
     { title: "Total Unpaid Offers", value: 0, icon: <FaTimesCircle /> },
     { title: "Total Paid Offers", value: 0, icon: <FaDollarSign /> },
   ]);
+
+  const { user } = useAuth()
 
   const [, setSearchParams] = useSearchParams();
 
@@ -97,9 +100,7 @@ const Dashboard: React.FC = () => {
     }
   }, [isEditOpen, setSearchParams, placingSlipModal, isUploadModalOpen]);
 
-  useEffect(() => {
-    console.log(offerStatsData);
-  }, [isOfferStatsFetched, offerStatsData]);
+
 
   useEffect(() => {
     if (isOfferStatsFetched && offerStatsData) {
@@ -155,7 +156,7 @@ const Dashboard: React.FC = () => {
           <div className="flex justify-between py-1">
             <span className="font-thin text-sm">
               <span className=" font-semibold">Today:</span>{" "}
-              {moment().format("MMM Do YYYY")}
+              {moment().format("MMMM Do, YYYY")}
             </span>
             <div>
               {toggleEye ? (
@@ -190,15 +191,15 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="flex items-center">
             <div className="border h-20 w-20 rounded-full flex justify-center items-center text-4xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
-              CB
+              {abbreviationGenerator(user?.assoc_first_name || "", user?.assoc_last_name || "")}
             </div>
 
             <div className="flex-1 space-y-3">
-              <h3 className="text-2xl -mb-4 font-semibold text-gray-800">
-                Good Afternoon, Cole Baidoo
+              <h3 className="text-xl -mb-2 font-semibold text-gray-800">
+                Good Afternoon, {user?.assoc_first_name} {user?.assoc_last_name}
               </h3>
               <h3 className="font-light text-sm text-gray-500">
-                Insurance Company A
+                { user?.insurer_company_name }
               </h3>
 
               <div className="flex space-x-5 mt-2">
@@ -219,15 +220,16 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <FaMoneyBillWave className="text-green-400" size={30} />
+                  {/* <FaMoneyBillWave className="text-green-400" size={30} /> */}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="#ffd700" className="w-8" viewBox="0 0 512 512">
+                  <path d="M211 7.3C205 1 196-1.4 187.6 .8s-14.9 8.9-17.1 17.3L154.7 80.6l-62-17.5c-8.4-2.4-17.4 0-23.5 6.1s-8.5 15.1-6.1 23.5l17.5 62L18.1 170.6c-8.4 2.1-15 8.7-17.3 17.1S1 205 7.3 211l46.2 45L7.3 301C1 307-1.4 316 .8 324.4s8.9 14.9 17.3 17.1l62.5 15.8-17.5 62c-2.4 8.4 0 17.4 6.1 23.5s15.1 8.5 23.5 6.1l62-17.5 15.8 62.5c2.1 8.4 8.7 15 17.1 17.3s17.3-.2 23.4-6.4l45-46.2 45 46.2c6.1 6.2 15 8.7 23.4 6.4s14.9-8.9 17.1-17.3l15.8-62.5 62 17.5c8.4 2.4 17.4 0 23.5-6.1s8.5-15.1 6.1-23.5l-17.5-62 62.5-15.8c8.4-2.1 15-8.7 17.3-17.1s-.2-17.4-6.4-23.4l-46.2-45 46.2-45c6.2-6.1 8.7-15 6.4-23.4s-8.9-14.9-17.3-17.1l-62.5-15.8 17.5-62c2.4-8.4 0-17.4-6.1-23.5s-15.1-8.5-23.5-6.1l-62 17.5L341.4 18.1c-2.1-8.4-8.7-15-17.1-17.3S307 1 301 7.3L256 53.5 211 7.3z"/></svg>
                   <div>
                     <h3 className="font-semibold text-sm text-gray-600">
-                      Cash Earned
+                      Badge Earned
                     </h3>
                     {toggleEye ? (
                       <h4 className="text-sm font-light text-gray-800">
-                        GHC
-                        <CountUp end={5000} />
+                        Big Boss                        
                       </h4>
                     ) : (
                       <div className="border h-5 bg-gray-700"> </div>
@@ -281,7 +283,7 @@ const Dashboard: React.FC = () => {
               className="flex items-center px-4 py-2 bg-green-500 text-white font-semibold rounded-md shadow-md hover:bg-green-600 transition"
             >
               <FaPlus className="mr-2" />
-              Create Business
+              Create Offer
             </button>
             {/* <button className="flex items-center px-4 py-2 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 transition">
               <FaUpload className="mr-2" />
