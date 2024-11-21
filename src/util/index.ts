@@ -36,4 +36,9 @@ export const abbreviationGenerator = (first_name: string, last_name: string) => 
   return `${first_name.charAt(0)}${last_name.charAt(0)}`
 }
 
+export const abbreviationFullNameGenerator = (fullName: string) => {
+  const names = fullName.split(" ");
+  return `${names[0].charAt(0)}${names[1].charAt(0)}`
+}
+
 export default apiInstance;

@@ -65,11 +65,7 @@ const BusinessEditModal: React.FC<BusinessModalProp> = ({ close }) => {
     mutationKey: ['businessUpdateMutate'],
     mutationFn: (data: OfferProps) => {
       const param = searchParams.get('_content');
-      return apiInstance.put(`/api/v1/offer/${param}`, data, {
-        headers: {
-          'Authorization': 'Bearer 8|xJs2fUqSbH3KOtTuOvorzY0gh3JMw6m544EB10pHaf9889fc'
-        }
-      })
+      return apiInstance.put(`/api/v1/offer/${param}`, data)
     },
     onSuccess: (data) => {
       toast.success(data.data.message, {

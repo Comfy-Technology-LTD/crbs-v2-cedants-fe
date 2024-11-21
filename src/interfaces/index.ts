@@ -197,3 +197,48 @@ export interface ErrorResponse {
 
 export type ErrorBag = Record<string, string[]>;
 
+export interface OfferMessageContentProps {
+  uuid: string;
+  state: 'EXTERNAL' | 'INTERNAL',
+  timestamp: string;
+  message: string;
+  sender_name: string;
+}
+
+export interface OfferMessageProps {
+  id: number;
+  message_content: OfferMessageContentProps []
+}
+
+export interface UnderWriterPointProps {
+  total_points_earned: number;
+  badge_earned: string
+}
+
+export interface VoucherProps {
+  points_earned: number;
+  badge_earned: string;
+  voucher_code?: string;
+}
+
+
+export interface VoucherModalProps {
+  close: () => void
+}
+
+export interface ClaimPointProps {
+  claim_date: string;
+  claim_prize?: string;
+  claim_voucher: string;
+  claimed_points: number;
+  badge_earned: string;
+  id: number
+}
+
+export interface ClaimPointDataProps {
+  current_page: number;
+  last_page: number;
+  total: number;
+  data: ClaimPointProps[];
+
+}

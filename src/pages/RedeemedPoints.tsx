@@ -1,11 +1,78 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CountUp from "react-countup";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import VoucherModal from "../components/commons/VoucherModal";
+import { useQuery } from "@tanstack/react-query";
+import apiInstance from "../util";
+import Loading from "../components/commons/Loading";
+import { ClaimPointDataProps, ClaimPointProps, UnderWriterPointProps } from "../interfaces";
+import moment from "moment";
+import { useSearchParams } from "react-router-dom";
 
 const RedeemedPoints = () => {
   const navigate = useNavigate();
   const [toggleEye, setToggleEye] = useState(false);
+  const [voucherModal, setVoucherModal] = useState(false)
+  const [, setSearchParams] = useSearchParams()
+
+  const {
+    data: pointClaimData,
+    isLoading: isPointClaimDataLoading,
+    // isFetching: isPointClaimDataFetching,
+    // refetch,
+  } = useQuery<ClaimPointDataProps>({
+    queryKey: ["pointClaim"],
+    queryFn: async () => {
+      const response = await apiInstance.get(`api/v1/under-writer-points`);
+      const data = response?.data.data;
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+
+  const {
+    data: underPointData,
+    // isLoading: isUnderWriterPointLoading,
+    // refetch: refetchUnderWriterPoint,
+  } = useQuery<UnderWriterPointProps>({
+    queryKey: ["fetchPoint"],
+    queryFn: async () => {
+      const response = await apiInstance.get(`api/v1/point`);
+      console.log(response)
+      return response?.data.data;
+    },
+  });
+
+  const handleVoucher = (id: string) => {
+    if (!toggleEye) {
+      return;
+    }
+
+    setSearchParams({
+      _content: id,
+    });
+    setVoucherModal(true)
+
+  }
+
+
+  useEffect(() => {
+    if (!voucherModal) {
+      setSearchParams({});
+    }
+  }, [voucherModal, setSearchParams]);
+
+
+
+  useEffect(() => {
+    console.log(pointClaimData?.data)
+  }, [pointClaimData])
+
+  if (isPointClaimDataLoading) {
+    return <Loading title="Gathering your points" />
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -53,7 +120,7 @@ const RedeemedPoints = () => {
             {
               toggleEye ? (
                 <h4 className="font-light text-gray-800">
-                  <CountUp end={120} />
+                  <CountUp end={underPointData?.total_points_earned || 0} />
                 </h4>
               ) : (
                 <div className="border h-5 bg-gray-700"> </div>
@@ -62,13 +129,14 @@ const RedeemedPoints = () => {
           </p>
         </div>
         <div className="bg-white p-4 shadow rounded-lg">
-          <h3 className="text-lg font-semibold">Cash Earned</h3>
+          <h3 className="text-lg font-semibold">Badge Earned</h3>
           <p className="text-2xl font-bold">
             {
               toggleEye ? (
                 <h4 className="font-light text-gray-800">
-                  GHC {" "}
-                  <CountUp end={6000} />
+                  {
+                    underPointData?.badge_earned
+                  }
                 </h4>
               ) : (
                 <div className="border h-5 bg-gray-700"> </div>
@@ -81,157 +149,64 @@ const RedeemedPoints = () => {
         <thead>
           <tr className="bg-gray-200 text-gray-600 text-sm">
             <th className="py-3 px-6">Points Redeemed</th>
-            <th className="py-3 px-6">Cash Redeemed</th>
-            <th className="py-3 px-6">Payment Type</th>
-            <th className="py-3 px-6">Redeem Status</th>
-            <th className="py-3 px-6">Date Created</th>
-            <th className="py-3 px-6">Date Updated</th>
-            <th className="py-3 px-6">Actions</th>
+            <th className="py-3 px-6">Voucher</th>
+            <th className="py-3 px-6">Claim Date</th>
+            <th className="py-3 px-6">Prize</th>
+            {/* <th className="py-3 px-6">Actions</th> */}
           </tr>
         </thead>
         <tbody>
-          <tr className="border-b text-gray-600">
-            <td className="py-3 px-6">
-              {
-                toggleEye ? (
-                  <h4 className="font-light text-gray-800">
-                    20
-                  </h4>
-                ) : (
-                  <div className="border h-5 bg-gray-700"> </div>
-                )
-              }
-            </td>
-            <td className="py-3 px-6">
-              {
-                toggleEye ? (
-                  <h4 className="font-light text-gray-800">
-                    GHC {" "} 1000
-                  </h4>
-                ) : (
-                  <div className="border h-5 bg-gray-700"> </div>
-                )
-              }
-            </td>
-            <td className="py-3 px-6">Bank Transfer</td>
-            <td className="py-3 px-6">
-              <span className="border px-2 text-xs bg-green-700 text-white rounded-full">Completed</span>
-            </td>
-            <td className="py-3 px-6">2024-01-01</td>
-            <td className="py-3 px-6">2024-01-02</td>
-            <td className="py-3 px-6">
+
+          {
+            pointClaimData?.data.map((claim: ClaimPointProps, key: number) => (
+              <tr key={key} className="border-b text-gray-600">
+                <td className="py-3 px-6 text-center">
+                  {
+                    toggleEye ? (
+                      <h4 className="font-light text-gray-800">
+                        {claim?.claimed_points}
+                      </h4>
+                    ) : (
+                      <div className="border h-5 bg-gray-700"> </div>
+                    )
+                  }
+                </td>
+                <td className="py-3 px-6 text-center">
+                  {
+                    toggleEye ? (
+                      <span onClick={() => handleVoucher(claim?.id.toString())} className="border px-4 text-sm py-1 hover:bg-orange-600 cursor-pointer bg-orange-500 font-semibold text-white  rounded-full ">
+                        {claim?.claim_voucher}
+                      </span>
+                    ) : (
+                      <div className="border h-5 bg-gray-700"> </div>
+                    )
+                  }
+                </td>
+                <td className="py-3 px-6 text-center">{ moment(claim?.claim_date).format("MMMM Do, YYYY") }</td>
+                <td className="py-3 px-6 text-center">
+                  <span className="border px-2 text-xs bg-red-700 text-white rounded-full">
+                    {
+                      claim?.claim_prize ? claim?.claim_prize : "Spin to win"
+                    }
+                  </span>
+                </td>
+                {/* <td className="py-3 px-6">
               <button className="text-blue-500 hover:underline">
                 Follow Up
               </button>
-            </td>
-          </tr>
-          <tr className="border-b text-gray-600">
-            <td className="py-3 px-6">
-              {
-                toggleEye ? (
-                  <h4 className="font-light text-gray-800">
-                    40
-                  </h4>
-                ) : (
-                  <div className="border h-5 bg-gray-700"> </div>
-                )
-              }
-            </td>
-            <td className="py-3 px-6">
-              {
-                toggleEye ? (
-                  <h4 className="font-light text-gray-800">
-                    GHC {" "} 4000
-                  </h4>
-                ) : (
-                  <div className="border h-5 bg-gray-700"> </div>
-                )
-              }
-            </td>
-            <td className="py-3 px-6">Mobile Money</td>
-            <td className="py-3 px-6">
-              <span className="border px-2 text-xs bg-green-700 text-white rounded-full">Completed</span>
-            </td>
-            <td className="py-3 px-6">2024-01-01</td>
-            <td className="py-3 px-6">2024-01-02</td>
-            <td className="py-3 px-6">
-              <button className="text-blue-500 hover:underline">
-                Follow Up
-              </button>
-            </td>
-          </tr>
-          <tr className="border-b text-gray-600">
-            <td className="py-3 px-6">
-              {
-                toggleEye ? (
-                  <h4 className="font-light text-gray-800">
-                    30
-                  </h4>
-                ) : (
-                  <div className="border h-5 bg-gray-700"> </div>
-                )
-              }
-            </td>
-            <td className="py-3 px-6">
-              {
-                toggleEye ? (
-                  <h4 className="font-light text-gray-800">
-                    GHC {" "} 3000
-                  </h4>
-                ) : (
-                  <div className="border h-5 bg-gray-700"> </div>
-                )
-              }
-            </td>
-            <td className="py-3 px-6">Cheque</td>
-            <td className="py-3 px-6">
-              <span className="border px-2 text-xs bg-green-700 text-white rounded-full">Completed</span>
-            </td>
-            <td className="py-3 px-6">2024-01-01</td>
-            <td className="py-3 px-6">2024-01-02</td>
-            <td className="py-3 px-6">
-              <button className="text-blue-500 hover:underline">
-                Follow Up
-              </button>
-            </td>
-          </tr>
-          <tr className="border-b text-gray-600">
-            <td className="py-3 px-6">
-              {
-                toggleEye ? (
-                  <h4 className="font-light text-gray-800">
-                    10
-                  </h4>
-                ) : (
-                  <div className="border h-5 bg-gray-700"> </div>
-                )
-              }
-            </td>
-            <td className="py-3 px-6">
-              {
-                toggleEye ? (
-                  <h4 className="font-light text-gray-800">
-                    GHC {" "} 500
-                  </h4>
-                ) : (
-                  <div className="border h-5 bg-gray-700"> </div>
-                )
-              }
-            </td>
-            <td className="py-3 px-6">Cash</td>
-            <td className="py-3 px-6">
-              <span className="border px-2 text-xs bg-green-700 text-white rounded-full">Completed</span>
-            </td>
-            <td className="py-3 px-6">2024-01-01</td>
-            <td className="py-3 px-6">2024-01-02</td>
-            <td className="py-3 px-6">
-              <button className="text-blue-500 hover:underline">
-                Follow Up
-              </button>
-            </td>
-          </tr>
+            </td> */}
+              </tr>
+            ))
+          }
+
+
         </tbody>
       </table>
+
+      {
+        voucherModal && <VoucherModal close={() => setVoucherModal(false)} />
+      }
+
     </div>
   );
 };

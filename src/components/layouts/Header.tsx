@@ -19,7 +19,7 @@ const Header = () => {
 
   return (
     <div className="bg-[#F3F4F6] py-4 px-6">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+      <div className="flex items-center justify-between px-52 mx-auto">
         <div className="flex items-center">
           <img src={LOGO} alt="Visal Re" className="h-8 w-auto sm:h-10" />
           <div className="ml-2">

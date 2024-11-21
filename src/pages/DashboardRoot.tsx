@@ -21,7 +21,7 @@ const DashboardRoot: React.FC = () => {
       navigation.state == "loading" && <Loading title='Preparing PLACE-IT...' />
     }
       <Header />
-      <main className=" max-w-7xl mx-auto min-h-screen ">
+      <main className=" px-52 mx-auto min-h-screen ">
         <Outlet />
       </main>
     </>

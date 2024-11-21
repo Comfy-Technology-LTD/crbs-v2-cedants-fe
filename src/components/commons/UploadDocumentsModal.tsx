@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import apiInstance from "../../util";
 import Loading from "./Loading";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { PDFICON } from "../../constants";
 
@@ -134,7 +134,7 @@ const UploadDocumentsModal: React.FC<UploadDocumentsModalProps> = ({
             </div>
 
             <div className="border-2 border-dashed p-2 mt-1 mb-1 rounded-lg">
-              <h2 className="font-semibold text-sm mb-2">Policy Overview</h2>
+              <h2 className="font-semibold text-sm mb-2">Facultative offer overview</h2>
               <div className="flex justify-between">
                 <div>
                   <p className="text-xs font-thin">
