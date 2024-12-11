@@ -340,7 +340,7 @@ const Dashboard: React.FC = () => {
         ) : (
           <>
             <div className="overflow-auto bg-white shadow-md rounded-lg">
-              <table className="min-w-full bg-white border">
+              <table className="min-w-full z-50 bg-white border">
                 <thead>
                   <tr className="bg-gray-200 text-gray-600 text-sm leading-normal">
                     <th className="py-3 px-6 text-left">Policy Number</th>
@@ -352,7 +352,7 @@ const Dashboard: React.FC = () => {
                     {/* <th className="py-3 px-6 text-left">Offer Status</th> */}
                     <th className="py-3 px-6 text-left">Trans State</th>
                     <th className="py-3 px-6 text-left">Payment Status</th>
-                    <th className="py-3 px-6 text-left">Business Date</th>
+                    <th className="py-3 px-6 text-left">Offer Date</th>
                     <th className="py-3 px-6 text-left">Actions</th>
                   </tr>
                 </thead>
@@ -434,7 +434,7 @@ const Dashboard: React.FC = () => {
                           </button>
                           <button
                             onClick={() => toggleOfferThreadModal(item?.id.toString())}
-                            className="flex items-center px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition"
+                            className="flex items-center px-3 py-1 bg-sky-500 text-white rounded-md text-xs hover:bg-sky-600 transition"
                           >
                             <span className="mr-1 ">Thread</span>
                             <svg
