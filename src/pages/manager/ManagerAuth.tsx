@@ -7,6 +7,11 @@ import Loading from "../../components/commons/Loading";
 import { AxiosError } from "axios";
 import { ErrorResponse } from "../../interfaces";
 
+type ValidateOTPProps = {
+  phonenumber: string;
+  otp: string;
+}
+
 const ManagerAuth: React.FC = () => {
   const [otp, setOtp] = useState<string>("");
   const [lastFourDigits, setLastFourDigits] = useState<string>("");
@@ -14,20 +19,36 @@ const ManagerAuth: React.FC = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
+  const validateOTPMutation = useMutation({
+    mutationKey: ['validateOTPMutation'],
+    mutationFn: (data: ValidateOTPProps) => {
+      return apiInstance.post(`/v1/api/validate-otp`, data)
+    },
+    onSuccess: (data) => {
+      console.log(data)
+      toast.success(data.data.message, {
+        theme: 'colored',
+        position: 'top-center'
+      });
 
-  // const {
-  //   data,
-  //   isLoading,
-  //   isError
-  // } = useQuery({
-  //   queryKey: ["fetchOffers"],
-  //   queryFn: () => {
-  //     const phonenumber: string = atob(searchParams.get('q') || "")
-  //     return apiInstance.post(`/v1/api/generate-otp`, {
-  //       phonenumber
-  //     });
-  //   },
-  // });
+
+      setAuthView(false)
+      localStorage.setItem("__u_access_token", data.data.access_token)
+      localStorage.setItem("__u", JSON.stringify(data.data.user))
+      navigate("/offers-dashboard", { replace: true })
+
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      console.error(error)
+      toast.warn(error?.response?.data?.message, {
+        theme: 'colored',
+        position: 'top-center'
+      });
+      setAuthView(true)
+      console.log("Something went wrong")
+    }
+  });
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
@@ -44,7 +65,16 @@ const ManagerAuth: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    alert(`OTP Submitted: ${otp}`);
+
+    console.log(`OTP Submitted: ${otp}`);
+    const phonenumber: string = atob(searchParams.get('q') || "")
+    const data: ValidateOTPProps = {
+      phonenumber,
+      otp
+    }
+
+    console.log(data);
+    validateOTPMutation.mutate(data)
   };
 
   useEffect(() => {

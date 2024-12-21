@@ -16,6 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthContext.tsx'
 import ManagerDashboardRoot from './pages/manager/ManagerDashboardRoot.tsx'
 import ManagerAuth from './pages/manager/ManagerAuth.tsx'
+import OfferDashboard from './pages/manager/OfferDashboard.tsx'
 
 const queryClient = new QueryClient()
 
@@ -62,6 +63,10 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <ManagerAuth />
+      },
+      {
+        path: "offers-dashboard",
+        element: <OfferDashboard />
       },
     ]
   }
