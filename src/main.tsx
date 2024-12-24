@@ -14,6 +14,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthContext.tsx'
+import ManagerDashboardRoot from './pages/manager/ManagerDashboardRoot.tsx'
+import ManagerAuth from './pages/manager/ManagerAuth.tsx'
+import OfferDashboard from './pages/manager/OfferDashboard.tsx'
 
 const queryClient = new QueryClient()
 
@@ -50,6 +53,21 @@ const router = createBrowserRouter([
         path: "profile",
         element: <Profile />
       }
+    ]
+  },
+  {
+    path: "/manager-dashboard",
+    element: <ManagerDashboardRoot />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "",
+        element: <ManagerAuth />
+      },
+      {
+        path: "offers-dashboard",
+        element: <OfferDashboard />
+      },
     ]
   }
 ])
