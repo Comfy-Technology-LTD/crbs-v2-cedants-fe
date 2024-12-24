@@ -181,7 +181,7 @@ const TransactionThread: React.FC<TransactionThreadProps> = ({ close }) => {
         </div>
 
         <div
-          className={`border h-3/5  rounded-lg space-y-4 py-2 flex  ${
+          className={`border h-[50vh]  rounded-lg space-y-4 py-2 flex  ${
             chatMessage?.length ? "flex-col" : " justify-center items-center "
           }  bg-transparent overflow-y-scroll scrollbar-hide`}
           contentEditable={false}

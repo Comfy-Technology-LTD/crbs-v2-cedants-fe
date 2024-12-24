@@ -83,7 +83,7 @@ const RedeemPointsModal: React.FC<RedeemPointsModalProps> = ({ close }) => {
 
           <div>
             {
-              (underPointData && underPointData?.total_points_earned >= 50) ? (
+              (underPointData && underPointData?.total_points_earned >= 20) ? (
                 <>
                   <div className="mb-4">
                     <label className="block text-gray-600 mb-1 py-1 text-lg font-extralight">Points to Redeem</label>
