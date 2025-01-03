@@ -181,9 +181,8 @@ const TransactionThread: React.FC<TransactionThreadProps> = ({ close }) => {
         </div>
 
         <div
-          className={`border h-[50vh]  rounded-lg space-y-4 py-2 flex  ${
-            chatMessage?.length ? "flex-col" : " justify-center items-center "
-          }  bg-transparent overflow-y-scroll scrollbar-hide`}
+          className={`border h-[50vh]  rounded-lg space-y-4 py-2 flex  ${chatMessage?.length ? "flex-col" : " justify-center items-center "
+            }  bg-transparent overflow-y-scroll scrollbar-hide`}
           contentEditable={false}
         >
           {chatMessage?.length ? (
@@ -191,16 +190,15 @@ const TransactionThread: React.FC<TransactionThreadProps> = ({ close }) => {
               (message: OfferMessageContentProps, key: number) => (
                 <div
                   key={key}
-                  className={`flex ${
-                    message.state === "EXTERNAL"
+                  className={`flex ${message.state === "EXTERNAL"
                       ? "flex-row-reverse"
                       : "flex-row"
-                  } space-x-1 px-2`}
+                    } space-x-1 px-2`}
                 >
-                  <div className={`h-10 w-10 rounded-full flex justify-center items-center text-xl font-bold ${ message.state === "EXTERNAL" ? "bg-orange-700" : "bg-blue-700"} text-white`}>
+                  <div className={`h-10 w-10 rounded-full flex justify-center items-center text-xl font-bold ${message.state === "EXTERNAL" ? "bg-orange-700" : "bg-blue-700"} text-white`}>
                     {abbreviationFullNameGenerator(message.sender_name)}
                   </div>
-                  <div className={`border flex-1 h-auto p-2 mr-2 relative rounded-lg sbg-[#F3F4F6] ${ message.state === "EXTERNAL" ? "bg-orange-500/20" : "bg-blue-500/20"} `}>
+                  <div className={`border flex-1 h-auto p-2 mr-2 relative rounded-lg sbg-[#F3F4F6] ${message.state === "EXTERNAL" ? "bg-orange-500/20" : "bg-blue-500/20"} `}>
                     <p className=" font-extralight">
                       {" "}
                       <span className="font-semibold">

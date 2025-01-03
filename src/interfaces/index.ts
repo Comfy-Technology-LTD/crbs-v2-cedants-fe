@@ -6,7 +6,7 @@ export interface BusinessStatsProps {
 
 export interface BusinessModalProp {
   close: () => void;
-  closeState?: boolean
+  closeState?: boolean;
 }
 
 export interface RegisterProps {
@@ -38,8 +38,13 @@ export interface User {
   assoc_email: string;
   position: string;
   name: string;
-  insurer_company_name: string
+  insurer_company_name: string;
+  insurer?: {
+    insurer_company_name: string;
+  };
 }
+
+type EmployeeProps = Pick<User, "assoc_first_name" | "assoc_last_name">;
 
 export interface CedantProps {
   id: number;
@@ -51,6 +56,7 @@ export interface LoadingProps {
 }
 
 export interface OfferProps {
+  brokersbroker_id: string;
   class_of_businessesclass_of_business_id: string;
   policy_number: string;
   insured_by: string;
@@ -111,8 +117,8 @@ export interface Data {
 
 export interface SingleOfferResponse {
   data: {
-    data: Offer
-  }
+    data: Offer;
+  };
 }
 
 export interface Offer {
@@ -141,6 +147,8 @@ export interface Offer {
   offer_detail: OfferDetail;
   insurer: Insurer;
   class_of_business: ClassOfBusiness;
+  insurer_associate?: EmployeeProps;
+  reviews: string;
 }
 
 export interface Insurer {
@@ -187,8 +195,8 @@ export interface OfferStatsProps {
 }
 
 export interface DropdownButtonProps {
-  show_placing?: () => void
-  show_notes?: () => void
+  show_placing?: () => void;
+  show_notes?: () => void;
 }
 
 export interface ErrorResponse {
@@ -199,7 +207,7 @@ export type ErrorBag = Record<string, string[]>;
 
 export interface OfferMessageContentProps {
   uuid: string;
-  state: 'EXTERNAL' | 'INTERNAL',
+  state: "EXTERNAL" | "INTERNAL";
   timestamp: string;
   message: string;
   sender_name: string;
@@ -207,12 +215,12 @@ export interface OfferMessageContentProps {
 
 export interface OfferMessageProps {
   id: number;
-  message_content: OfferMessageContentProps []
+  message_content: OfferMessageContentProps[];
 }
 
 export interface UnderWriterPointProps {
   total_points_earned: number;
-  badge_earned: string
+  badge_earned: string;
 }
 
 export interface VoucherProps {
@@ -221,9 +229,8 @@ export interface VoucherProps {
   voucher_code?: string;
 }
 
-
 export interface VoucherModalProps {
-  close: () => void
+  close: () => void;
 }
 
 export interface ClaimPointProps {
@@ -232,7 +239,7 @@ export interface ClaimPointProps {
   claim_voucher: string;
   claimed_points: number;
   badge_earned: string;
-  id: number
+  id: number;
 }
 
 export interface ClaimPointDataProps {
@@ -240,5 +247,18 @@ export interface ClaimPointDataProps {
   last_page: number;
   total: number;
   data: ClaimPointProps[];
-
 }
+
+export type TransactionStateProps = {
+  initiated: JSX.Element;
+  approved: JSX.Element;
+  rejected: JSX.Element;
+  modify: JSX.Element;
+};
+
+export type ReviewProps = {
+  reviewer: string;
+  message: string;
+  timestamp: string;
+  position: string;
+};

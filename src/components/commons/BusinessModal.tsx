@@ -126,7 +126,33 @@ const BusinessModal: React.FC<BusinessModalProp> = ({ close }) => {
               </div>
 
               <div className="max-h-1/2 h-5/6 sh-full w-full overflow-y-auto scrollbar-hide px-2 py-2">
-                <div className="grid">
+                <div className="grid grid-cols-2 space-x-2">
+                  <div className="space-y-1 w-full mb-1">
+                    <label className="block text-gray-600 font-bold">Reinsurance Broker</label>
+                    <select
+                      {
+                      ...register('brokersbroker_id', {
+                        required: "Select class of business"
+                      })
+                      }
+                      className="w-full p-2 border border-yellow-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option defaultValue="" disabled>
+                        Select reinsurance broker
+                      </option>
+                      <option defaultValue="1">
+                        Visal Reinsurance Brokers
+                      </option>
+                      <option defaultValue="2" disabled>
+                        KEK Reinsurance Brokers
+                      </option>
+                      <option defaultValue="3" disabled>
+                        IRisk Reinsurance Brokers
+                      </option>
+                    </select>
+                    {
+                      errors?.brokersbroker_id && <p className="text-red-500 text-sm">{errors?.brokersbroker_id.message}</p>
+                    }
+                  </div>
                   <div className="space-y-1 w-full mb-1">
                     <label className="block text-gray-600">Class of Business</label>
                     <select

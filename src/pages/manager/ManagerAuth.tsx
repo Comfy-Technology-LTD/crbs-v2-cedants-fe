@@ -8,7 +8,7 @@ import { AxiosError } from "axios";
 import { ErrorResponse } from "../../interfaces";
 
 type ValidateOTPProps = {
-  phonenumber: string;
+  phone: string;
   otp: string;
 }
 
@@ -35,7 +35,7 @@ const ManagerAuth: React.FC = () => {
       setAuthView(false)
       localStorage.setItem("__u_access_token", data.data.access_token)
       localStorage.setItem("__u", JSON.stringify(data.data.user))
-      navigate("/offers-dashboard", { replace: true })
+      navigate("/manager-dashboard/offers-dashboard", { replace: true })
 
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -69,12 +69,20 @@ const ManagerAuth: React.FC = () => {
     console.log(`OTP Submitted: ${otp}`);
     const phonenumber: string = atob(searchParams.get('q') || "")
     const data: ValidateOTPProps = {
-      phonenumber,
+      phone: phonenumber,
       otp
     }
 
+    const otp_values = document.querySelectorAll('.otp-values');
+    otp_values.forEach((el) => {
+      const els = (el as HTMLInputElement)
+      console.log(els)
+      els.value = ""
+    })
+
     console.log(data);
     validateOTPMutation.mutate(data)
+
   };
 
   useEffect(() => {
@@ -192,7 +200,7 @@ const ManagerAuth: React.FC = () => {
                     maxLength={1}
                     value={otp[index] || ""}
                     onChange={(e) => handleChange(e, index)}
-                    className="w-12 h-12 text-center text-xl font-bold rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                    className="otp-values w-12 h-12 text-center text-xl font-bold rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                   />
                 ))}
               </div>

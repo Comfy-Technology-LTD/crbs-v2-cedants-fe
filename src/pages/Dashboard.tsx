@@ -1,4 +1,4 @@
-import { FaCoins, FaPlus } from "react-icons/fa";
+import { FaCoins, FaInfoCircle, FaPlus } from "react-icons/fa";
 import {
   FaHandshake,
   FaFolderOpen,
@@ -24,6 +24,7 @@ import PlacingSlipModal from "../components/commons/PlacingSlipModal";
 import UploadDocumentsModal from "../components/commons/UploadDocumentsModal";
 import { useAuth } from "../context/AuthContext";
 import TransactionThread from "../components/commons/TransactionThread";
+import OfferProgress from "../components/commons/OfferProgress";
 
 const Dashboard: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,6 +42,7 @@ const Dashboard: React.FC = () => {
     { title: "Total Paid Offers", value: 0, icon: <FaDollarSign /> },
   ]);
   const [openThread, setOpenThread] = useState(false)
+  const [offerProgressModal, setOfferProgressModal] = useState<boolean>(false);
 
   const { user } = useAuth();
 
@@ -75,6 +77,12 @@ const Dashboard: React.FC = () => {
     setOpenThread(!openThread);
   };
 
+  const toggleOfferProgressModal = (id: string) => {
+    setSearchParams({
+      _content: id,
+    });
+    setOfferProgressModal(!offerProgressModal)
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -112,7 +120,6 @@ const Dashboard: React.FC = () => {
     queryKey: ["fetchPoint"],
     queryFn: async () => {
       const response = await apiInstance.get(`api/v1/point`);
-      console.log(response)
       return response?.data.data;
     },
   });
@@ -294,8 +301,8 @@ const Dashboard: React.FC = () => {
       <div className="p-6 bg-gray-50 shadow-lg ">
         <div
           className={`flex ${offerData?.data?.data?.total === 0
-              ? "justify-end"
-              : "justify-between"
+            ? "justify-end"
+            : "justify-between"
             } items-center mb-4`}
         >
           {offerData?.data?.data?.total ? (
@@ -352,6 +359,7 @@ const Dashboard: React.FC = () => {
                     {/* <th className="py-3 px-6 text-left">Offer Status</th> */}
                     <th className="py-3 px-6 text-left">Trans State</th>
                     <th className="py-3 px-6 text-left">Payment Status</th>
+                    <th className="py-3 px-6 text-left">Track</th>
                     <th className="py-3 px-6 text-left">Offer Date</th>
                     <th className="py-3 px-6 text-left">Actions</th>
                   </tr>
@@ -387,7 +395,14 @@ const Dashboard: React.FC = () => {
                           </span>
                         </td> */}
                         <td className="py-3 px-6 text-left">
-                          <span className="px-2 py-1 lowercase rounded-full bg-orange-700 text-white text-xs font-semibold">
+                          <span className={`px-2 py-1  rounded-full ${item?.transaction_status === 'APPROVED'
+                            ? 'bg-[#00802b]'
+                            : item?.transaction_status === 'REJECTED'
+                              ? 'bg-[#e60000]'
+                              : item?.transaction_status === 'MODIFY'
+                                ? 'bg-[#ff8000]'
+                                : 'bg-[#fcba03]'
+                            } text-white text-xs font-semibold`}>
                             {item?.transaction_status}
                           </span>
                         </td>
@@ -396,62 +411,71 @@ const Dashboard: React.FC = () => {
                             {item?.payment_status}
                           </span>
                         </td>
+                        <td>
+                          <div className="flex justify-center">
+                            <button onClick={() => toggleOfferProgressModal(item?.id.toString())}>
+                              <FaInfoCircle size={20} />
+                            </button>
+                          </div>
+                        </td>
                         <td className="py-3 px-6 text-left">
                           {moment(item?.created_at).format("MMM Do YYYY")}
                         </td>
-                        <td className="py-3 px-6 flex items-center sflex-wrap space-y-2 text-left space-x-2">
-                          <DropDownButton
-                            show_placing={() =>
-                              togglePlacingSlipModal(item?.id.toString())
-                            }
-                          />
-                          <button
-                            onClick={() => toggleEditModal(item?.id.toString())}
-                            className="flex items-center px-3 py-1 bg-orange-500 text-white rounded-md text-xs hover:bg-orange-600 transition"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() =>
-                              toggleUploadDocumentModal(item?.id.toString())
-                            }
-                            className="flex items-center px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1}
-                              stroke="currentColor"
-                              className="size-4"
+                        <td className="py-3 px-6 text-left space-x-2">
+                          <div className=" flex items space-x-1">
+                            <DropDownButton
+                              show_placing={() =>
+                                togglePlacingSlipModal(item?.id.toString())
+                              }
+                            />
+                            <button
+                              onClick={() => toggleEditModal(item?.id.toString())}
+                              className="flex items-center px-3 py-1 bg-orange-500 text-white rounded-md text-xs hover:bg-orange-600 transition"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"
-                              />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => toggleOfferThreadModal(item?.id.toString())}
-                            className="flex items-center px-3 py-1 bg-sky-500 text-white rounded-md text-xs hover:bg-sky-600 transition"
-                          >
-                            <span className="mr-1 ">Thread</span>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className="size-4"
+                              Edit
+                            </button>
+                            <button
+                              onClick={() =>
+                                toggleUploadDocumentModal(item?.id.toString())
+                              }
+                              className="flex items-center px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
-                              />
-                            </svg>
-                          </button>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1}
+                                stroke="currentColor"
+                                className="size-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"
+                                />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => toggleOfferThreadModal(item?.id.toString())}
+                              className="flex items-center px-3 py-1 bg-sky-500 text-white rounded-md text-xs hover:bg-sky-600 transition"
+                            >
+                              <span className="mr-1 ">Thread</span>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="size-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
+                                />
+                              </svg>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     )
@@ -480,9 +504,9 @@ const Dashboard: React.FC = () => {
                   offerData?.data?.data?.last_page
                 }
                 className={`px-3 py-1 bg-gray-300 text-gray-700 rounded-md ${offerData?.data?.data?.current_page ===
-                    offerData?.data?.data?.last_page
-                    ? "cursor-not-allowed"
-                    : "hover:bg-gray-400"
+                  offerData?.data?.data?.last_page
+                  ? "cursor-not-allowed"
+                  : "hover:bg-gray-400"
                   } transition`}
               >
                 Next
@@ -507,6 +531,8 @@ const Dashboard: React.FC = () => {
           <TransactionThread close={() => setOpenThread(false)} />
         )
       }
+      {offerProgressModal && <OfferProgress close={() => setOfferProgressModal(false)} />}
+
     </div>
   );
 };

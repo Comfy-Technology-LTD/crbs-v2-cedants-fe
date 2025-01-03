@@ -25,7 +25,7 @@ const DropDownButton: React.FC<DropdownButtonProps> = ({ show_placing, show_note
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200  shadow-lg z-10">
+        <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200  shadow-lg z-50">
           <button
             className="w-full text-left px-3 py-2  text-black text-xs hover:text-white hover:bg-blue-600 transition"
             onClick={() => {
